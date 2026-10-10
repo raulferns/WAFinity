@@ -1,261 +1,180 @@
+# WAFinity
 
-<p align="center">
-  <a href="https://mickaelasseline.com">
-    <img src="https://zupimages.net/up/20/04/7vtd.png" width="140px" alt="PAPAMICA" />
-  </a>
-</p>
-
-<p align="center">
-  <a href="#"><img src="https://readme-typing-svg.herokuapp.com?center=true&vCenter=true&lines=WAF-CHECKER.COM;"></a>
-</p>
 <div align="center">
-A powerful web application to test how well your Web Application Firewall (WAF) protects against common attack vectors.
 
-→ [waf-checker.com](https://waf-checker.com) ←
+<p align="center">
+  <img src="./app/src/static/favicon.svg" width="96px" alt="WAFinity Logo" />
+</p>
+
+# WAFinity — Advanced Web Application Firewall & Security Audit Platform
+
+An all-in-one web security suite and reconnaissance platform built on Cloudflare Workers. Test WAF robustness against real-world exploits, measure false positive resilience, inspect security headers, fingerprint target infrastructure, and run high-speed performance and SEO audits.
+
+[![Repository](https://img.shields.io/badge/GitHub-raulferns%2FWAFinity-orange?style=flat-square&logo=github)](https://github.com/raulferns/WAFinity)
+[![Runtime](https://img.shields.io/badge/Platform-Cloudflare%20Workers-f38020?style=flat-square&logo=cloudflare)](https://workers.cloudflare.com/)
+[![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](LICENSE)
+
 </div>
 
+---
 
+## Overview
 
+**WAFinity** is a modern security audit workbench designed for penetration testers, DevSecOps engineers, and website owners. It combines deep automated WAF payload testing with passive and active reconnaissance tools—all wrapped in a cyber-inspired, dark-mode user interface.
 
+Whether evaluating firewall rules against OWASP Top 10 vectors or conducting comprehensive domain intelligence checks, WAFinity delivers real-time streaming feedback and actionable reports.
 
-![WAF Checker - Main Interface](./img/1-main.png)
+---
 
-## Features
+## Core Capabilities
 
-### Security Testing
-- **19+ attack categories** out of the box: SQL Injection, XSS, Path Traversal, Command Injection, SSRF, NoSQL Injection, LFI, LDAP Injection, XXE, SSTI, CRLF, and more
-- **9 advanced bypass categories** with encoding variations, protocol smuggling, and framework-specific payloads
-- **344+ payloads** loaded dynamically from [PAPAMICA/waf-payloads](https://github.com/PAPAMICA/waf-payloads)
-- **False positive testing** to verify legitimate traffic isn't being blocked
-- **HTTP method testing** across GET, POST, PUT, and DELETE
+### 1. WAF Security Testing
+- **19+ Attack Vectors**: Automated testing for SQL Injection (SQLi), Cross-Site Scripting (XSS), Path Traversal, OS Command Injection, Server-Side Request Forgery (SSRF), NoSQL Injection, Local File Inclusion (LFI), LDAP Injection, XML External Entity (XXE), Server-Side Template Injection (SSTI), CRLF Injection, Open Redirect, and more.
+- **Advanced Bypass Techniques**: Double URL encoding, Unicode normalization, mixed-case mutation, comment obfuscation, and HTTP manipulation testing.
+- **Real-Time SSE Streaming**: Live status progression showing exact request timings, HTTP methods, payloads, and response codes.
+- **Instant Verdict Indicators**: Clear color-coded test indicators marking blocked attacks as **Protected (Green)** and bypasses as **Vulnerable (Red)**.
+- **False Positive Mode**: Test benign, everyday payloads to identify over-aggressive rules blocking legitimate user traffic.
 
-### WAF Detection & Bypass
-- **Auto WAF detection** — identifies Cloudflare, AWS WAF, Imperva, ModSecurity, Akamai, F5 BIG-IP, and 15+ other WAFs
-- **Advanced bypass techniques** — double encoding, unicode, mixed case, comment obfuscation
-- **WAF-specific bypass generation** — tailored strategies per detected WAF
-- **HTTP manipulation testing** — verb tampering, parameter pollution, content-type confusion, request smuggling
+### 2. Auto WAF Detection
+- Identifies active firewall signatures and vendors, including:
+  - Cloudflare
+  - AWS WAF
+  - Akamai
+  - Imperva / Incapsula
+  - ModSecurity / OWASP CRS
+  - F5 BIG-IP
+  - Sucuri
+  - Fastly
+  - Fortinet FortiWeb
+  - Barracuda
 
-### Full Reconnaissance
+### 3. Full Reconnaissance
+- **Tech Stack Fingerprinting**: CMS identification (WordPress, Drupal, Joomla, Shopify), backend web servers, CDN providers, frontend frameworks, and JavaScript libraries.
+- **DNS Intelligence**: Resolution for A, AAAA, CNAME, MX, NS, TXT, and SOA records.
+- **WHOIS & IP Geolocation**: ASN details, ISP organization, geographic country/region, and reverse DNS (PTR).
+- **Subdomain Discovery**: Certificate Transparency (crt.sh) log analysis and DNS brute-force discovery.
+- **Shared Hosting Detection**: Reverse IP lookup identifying co-hosted domains on shared infrastructure.
+- **SSL/TLS Diagnostics**: Issuer verification, validity dates, Subject Alternative Names (SANs), and cryptographic parameters.
+- **Asset Probing**: Detection of `robots.txt`, `sitemap.xml`, `security.txt`, Open Graph metadata, and RSS feeds.
 
-![Full Reconnaissance](./img/8-recon.png)
+### 4. Security Headers Audit
+- **Letter Grade Scoring**: Evaluates HTTP headers from **A+** down to **F**.
+- **Header Analysis**: Strict-Transport-Security (HSTS), Content-Security-Policy (CSP), X-Frame-Options, X-Content-Type-Options, Referrer-Policy, and Permissions-Policy.
+- **Information Leakage Detection**: Detects server disclosure headers (`Server`, `X-Powered-By`, `X-AspNet-Version`, debug banners).
+- **Remediation Guides**: Actionable directives and configuration snippets for missing security headers.
 
-- **Technology fingerprinting** — CMS detection (WordPress, Drupal, Joomla, Shopify…), frameworks, web servers, CDN/WAF, analytics tools, and 25+ JavaScript libraries
-- **DNS analysis** — A, AAAA, CNAME, MX, NS, TXT, SOA records with infrastructure detection
-- **WHOIS & IP geolocation** — ISP, organization, ASN, location, reverse DNS (PTR)
-- **Subdomain discovery** — via Certificate Transparency logs (crt.sh) and DNS brute-force
-- **Reverse IP lookup** — discover all domains hosted on the same IP (shared hosting detection)
-- **SSL/TLS certificate details** — issuer, validity, Subject Alternative Names (SANs), serial number
-- **CMS deep analysis** — WordPress themes, plugins with versions; Drupal modules
-- **Path probing** — robots.txt, sitemap.xml, security.txt, common admin paths
-- **Cookie analysis** — Secure, HttpOnly, SameSite flags
-- **Open Graph & social metadata** extraction
-- **RSS/Atom feeds & email address** discovery
-- **Export results** as JSON, HTML report, or screenshot (PNG)
+### 5. Performance & Speed Test
+- **Core Web Vitals**: First Contentful Paint (FCP), Largest Contentful Paint (LCP), Total Blocking Time (TBT), Cumulative Layout Shift (CLS), and Time to Interactive (TTI).
+- **Network Breakdown**: DNS lookup duration, Time to First Byte (TTFB), content download time, and total latency.
+- **Page Weight Analysis**: Breakdown by content type (HTML, CSS, JavaScript, images, web fonts).
 
-### Security Headers Audit
+### 6. SEO & Hygiene Audit
+- **Comprehensive Score**: Meta tags verification (title, description, viewport, canonical, robots directives, lang, charset).
+- **Page Structure**: Heading hierarchy analysis, content-to-HTML ratio, keyword density, and link health (internal/external/broken anchors).
+- **Accessibility Checks**: Semantic landmarks, image alt attributes, contrast checks, and ARIA form labels.
 
-![Security Headers Audit](./img/9-headers.png)
+### 7. Export & Analytics
+- Multi-format export options: **JSON**, **CSV**, **HTML Report**, and visual dashboard analytics.
 
-- **Grade scoring** (A+ to F) of HTTP security headers
-- **Detailed analysis** of CSP, HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy
-- **Information disclosure detection** — server version, powered-by headers, debug headers
-- **Actionable recommendations** for each missing or misconfigured header
-- **Export results** as JSON, HTML report, or screenshot (PNG)
+---
 
-### Speed Test
-
-![Speed Test](./img/11-speedtest.png)
-
-- **Performance score** (0–100) with issues count and status
-- **Lighthouse-style scores** (estimated locally) — Performance, Accessibility, Best Practices, SEO
-- **Core Web Vitals** — FCP, LCP, TBT, CLS, Speed Index, TTI with color-coded feedback
-- **Timing breakdown** — DNS lookup, TTFB, download, total load time
-- **Size breakdown** — total page weight and per-type (HTML, JavaScript, images, fonts)
-- **Optimization advice** and penalty/improvement hints
-- **Export results** as JSON, HTML report, or screenshot (PNG)
-
-### DNS / WHOIS Intelligence
-
-![DNS / WHOIS Intelligence](./img/10-inspect-dns.png)
-
-- **Complete DNS resolution** — A, AAAA, CNAME, MX, NS, TXT records
-- **WHOIS data** with IP geolocation, ISP, ASN, and reverse DNS
-- **Email security audit** — SPF & DMARC validation
-- **Subdomain enumeration** — Certificate Transparency + DNS brute-force
-- **Reverse IP lookup** — all domains sharing the same IP address
-- **Infrastructure detection** — CDN, email, and DNS providers from record patterns
-- **Export results** as JSON, HTML report, or screenshot (PNG)
-
-### SEO Audit
-
-![SEO Audit](./img/12-seo-audit.png)
-
-- **Overall SEO score** (0–100) with checks passed / total
-- **Score by category** — Meta Tags, Technical, Indexability, Content, Performance, Social, Links, URL, Accessibility
-- **Meta tags verification** — title, description, viewport, canonical, language, charset, favicon, DOCTYPE, robots
-- **Sitemap & robots.txt** analysis, page discovery, structured data (JSON-LD)
-- **Content analysis** — word count, readability, keyword density, text-to-HTML ratio
-- **Links audit** — internal/external, nofollow, empty anchors
-- **Accessibility checks** — lang, skip nav, ARIA landmarks, form labels
-- **Export results** as JSON, HTML report, or screenshot (PNG)
-
-### Real-Time Results
-
-![Test Results](./img/4-results.png)
-
-- **Streaming results** via Server-Sent Events (SSE) — see results as they come in
-- **Color-coded status codes**:
-  - `403` green — WAF blocked the attack (protected)
-  - `200` red — payload passed through (vulnerable)
-  - `3xx` orange — redirect (requires investigation)
-  - `4xx` yellow — other client error
-- **Filterable results** by status code with real-time summary bars
-
-### HTTP Status Reference
-
-![HTTP Status Codes](./img/5-status-codes.png)
-
-### Payload Configuration
-
-Fully customizable payload management through the built-in configuration panel:
-
-![Payload Configuration](./img/2-payload-config.png)
-
-![Payload Editor](./img/3-payload-editor.png)
-
-- Browse all categories with payload counts
-- Add, edit, or remove individual payloads
-- Create custom categories
-- Separate **attack payloads** and **false positive** payloads per category
-- Export/import payload configurations
-- Changes persist in localStorage
-
-### Security Analytics
-
-Detailed vulnerability assessment reports with scoring:
-
-![Security Analytics](./img/6-analytics.png)
-
-- **WAF effectiveness score** — percentage of attacks blocked
-- **Risk level assessment** — Critical, High, Medium, Low
-- **Vulnerability breakdown** by severity
-- **Category-level analysis** with bypass rates
-- **Actionable recommendations**
-
-### Export & Reporting
-
-![HTML Report](./img/7-report.png)
-
-- Export results as **JSON**, **CSV**, or **HTML** report
-- Professional HTML report with executive summary
-- Per-category vulnerability assessment with scores
-- Screenshot support for sharing (PNG with branding)
-- All recon/audit features support JSON, HTML, and screenshot export
-
-### Public API
-
-![Public API](./img/13-api.png)
-
-- **REST API** for all tools — WAF checker, full recon, security headers, speed test, SEO audit, HTTP manipulation
-- **Rate limit** — 1 request per minute per IP (headers: `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`)
-- **No authentication** — public API, URL auto-normalized
-- **JSON responses** — use `curl`, `jq`, or any HTTP client; save with `-o file.json`
-- **WAF Checker endpoint** (`/api/v1/waf-checker`) with full advanced options: methods, categories, pagination, followRedirect, enhanced/advanced payloads, auto WAF detection, encoding variations, HTTP manipulation
-- **Error codes** — 400 (bad param), 404 (not found), 429 (rate limit), 500/502 (server/target error)
-- **Documentation** — in-app panel and machine-readable `GET /api/v1/docs`
-
-### Batch Testing
-- Test **up to 100 URLs** simultaneously
-- Concurrent processing with progress tracking
-- Per-URL results with bypass rate analysis
-
-### Scan History
-- **Automatic saving** of scan results to browser localStorage
-- Browse and review past scans with summary statistics
-- Quick re-scan from history entries
-
-## Architecture
-
-WAF-Checker is built as a **Cloudflare Worker** with static assets:
-
-- **Backend** (`app/src/api.ts`) — Worker handling API requests, payload delivery, WAF testing, reconnaissance, and DNS/WHOIS lookups
-- **Frontend** (`app/src/static/`) — Single-page app with cyberpunk UI
-- **Payloads** — Loaded dynamically at runtime from [GitHub](https://github.com/PAPAMICA/waf-payloads) to keep the worker bundle clean
-
-### Project Structure
+## Architecture & Tech Stack
 
 ```
-wrangler.toml                  # Cloudflare Worker configuration
-app/src/
-├── api.ts                     # Main Worker entry point & API routes
-├── payloads.ts                # Payload types (data loaded from GitHub)
-├── advanced-payloads.ts       # Encoding & bypass generation functions
-├── encoding.ts                # WAF bypass encoding utilities
-├── waf-detection.ts           # WAF fingerprinting & detection
-├── http-manipulation.ts       # HTTP protocol manipulation techniques
-├── reporting.ts               # Export & analytics module
-├── batch.ts                   # Batch testing module
-└── static/
-    ├── index.html             # Main web interface
-    ├── js/
-    │   ├── utils/             # Common utilities & HTTP codes
-    │   ├── modules/           # Full Recon, Headers, Speed Test, SEO Audit, etc.
-    │   └── main.js            # Main application controller
-    ├── main.js                # Compatibility entry point loader
-    ├── style.css              # Cyberpunk theme & styling
-    └── favicon.svg            # App icon
+WAFinity/
+├── app/
+│   ├── src/
+│   │   ├── api.ts              # Backend API & WAF check handlers (Cloudflare Worker)
+│   │   ├── static/             # Frontend client assets
+│   │   │   ├── index.html      # Main Single-Page Application (SPA)
+│   │   │   ├── style.css       # Core theme tokens & UI layout styles
+│   │   │   ├── favicon.svg     # Logo vector
+│   │   │   └── js/
+│   │   │       ├── main.js     # Primary dashboard logic & test streaming
+│   │   │       ├── modules/    # Modular tools (Recon, Headers, Speed, SEO, History, Export)
+│   │   │       └── utils/      # HTTP status helpers and UI utilities
+│   ├── wrangler.toml           # Worker deployment configuration
+│   └── package.json            # Worker dependencies
+└── README.md                   # Project documentation
 ```
+
+- **Runtime**: [Cloudflare Workers](https://workers.cloudflare.com/) (V8 Serverless Engine)
+- **Backend**: TypeScript / ES Modules
+- **Frontend**: Vanilla JavaScript (ES6+), Vanilla CSS, Tailwind CSS utilities
+- **Network**: Fetch API with Server-Sent Events (SSE) streaming
+
+---
 
 ## Getting Started
 
 ### Prerequisites
-- [Node.js](https://nodejs.org/) (v18+)
-- [Wrangler CLI](https://developers.cloudflare.com/workers/wrangler/install-and-update/)
+- [Node.js](https://nodejs.org/) (v18.0.0 or higher)
+- [npm](https://www.npmjs.com/) (v9 or higher)
 
 ### Local Development
 
-```bash
-# Clone the repository
-git clone https://github.com/PAPAMICA/waf-checker.git
-cd waf-checker
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/raulferns/WAFinity.git
+   cd WAFinity
+   ```
 
-# Install dependencies
-npm install
+2. **Install dependencies:**
+   ```bash
+   npm install
+   cd app && npm install && cd ..
+   ```
 
-# Start local dev server
-npx wrangler dev
-```
+3. **Start local development server:**
+   ```bash
+   cd app
+   npx wrangler dev
+   ```
 
-Open `http://localhost:8787` in your browser.
+4. **Access the application:**
+   Open [http://127.0.0.1:8787](http://127.0.0.1:8787) in your browser.
 
-### Deployment to Cloudflare
+---
 
-1. **Login to Cloudflare:**
+## Deployment to Cloudflare
+
+Deploy globally to Cloudflare Workers in seconds:
+
+1. **Authenticate Wrangler CLI:**
    ```bash
    npx wrangler login
    ```
 
-2. **Update `wrangler.toml`** with your `account_id`
-
-3. **Deploy:**
+2. **Deploy Worker:**
    ```bash
+   cd app
    npx wrangler deploy
    ```
 
-## Extending Payloads
+---
 
-Payloads are maintained in a separate repository: [PAPAMICA/waf-payloads](https://github.com/PAPAMICA/waf-payloads)
+## Customizing Payloads
 
-To modify the default payloads:
-1. Fork or edit the [payloads.json](https://github.com/PAPAMICA/waf-payloads/blob/main/payloads.json)
-2. Update the `GITHUB_PAYLOADS_URL` in `app/src/api.ts` if using a custom source
-
-You can also add custom payloads directly in the web interface via **Configure Payloads** — changes are saved in your browser's localStorage.
-
-## License
-
-MIT
+Payload categories are configured dynamically or customized directly in the UI:
+1. Open the dashboard and click **Configure Payloads** in the top navigation.
+2. Add custom strings, modify existing payloads, or import external payload lists.
+3. Custom payloads are persistently stored in your browser's local storage and executed in testing runs.
 
 ---
 
-Built by [Mickael Asseline](https://github.com/PAPAMICA)
+## Legal & Ethics Notice
+
+> **Important**: WAFinity is intended strictly for authorized security assessments, defensive validation, and research on infrastructure you own or have explicit, documented permission to test. Unauthorized testing against third-party systems may violate applicable computer misuse and cybersecurity laws.
+
+---
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
+
+---
+
+## Author & Maintainer
+
+Maintained by **[raulferns](https://github.com/raulferns)**  
+GitHub: [https://github.com/raulferns/WAFinity](https://github.com/raulferns/WAFinity)

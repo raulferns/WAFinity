@@ -211,13 +211,11 @@ function renderSummary(results, falsePositiveMode = false) {
 				dotColor = 'bg-amber-400';
 			}
 		} else {
-			if (codeNum === 403) {
+			if (codeNum >= 400 && codeNum < 500) {
 				dotColor = 'bg-emerald-400';
-			} else if (codeNum >= 200 && codeNum < 300) {
+			} else if ((codeNum >= 200 && codeNum < 300) || (codeNum >= 500 && codeNum < 600)) {
 				dotColor = 'bg-rose-400';
 			} else if (codeNum >= 300 && codeNum < 400) {
-				dotColor = 'bg-amber-400';
-			} else if (codeNum >= 400 && codeNum < 500) {
 				dotColor = 'bg-amber-400';
 			}
 		}
@@ -248,7 +246,7 @@ function renderResultRow(r, falsePositiveMode = false) {
 	let statusTooltip = '';
 
 	if (isError || isNaN(codeNum)) {
-		statusBg = 'bg-amber-500/10 border border-amber-500/25 text-amber-400';
+		statusBg = 'bg-rose-500/10 border border-rose-500/25 text-rose-400';
 	} else if (falsePositiveMode) {
 		if (codeNum >= 200 && codeNum < 300) {
 			statusBg = 'bg-emerald-500/10 border border-emerald-500/25 text-emerald-400';
@@ -263,17 +261,17 @@ function renderResultRow(r, falsePositiveMode = false) {
 			statusBg = 'bg-rose-500/10 border border-rose-500/25 text-rose-400';
 		}
 	} else {
-		if (codeNum === 403) {
+		// Normal Security Test:
+		// 4xx = Blocked by WAF / Protected (GREEN)
+		// 2xx or 5xx = Exploit succeeded / server failure = Vulnerable (RED)
+		// 3xx = Redirect (AMBER)
+		if (codeNum >= 400 && codeNum < 500) {
 			statusBg = 'bg-emerald-500/10 border border-emerald-500/25 text-emerald-400';
-		} else if (codeNum >= 200 && codeNum < 300) {
+		} else if ((codeNum >= 200 && codeNum < 300) || (codeNum >= 500 && codeNum < 600)) {
 			statusBg = 'bg-rose-500/10 border border-rose-500/25 text-rose-400';
 		} else if (codeNum >= 300 && codeNum < 400) {
 			statusBg = 'bg-amber-500/10 border border-amber-500/25 text-amber-400';
 			statusTooltip = `title="Redirect (${codeNum}): The server redirected this request."`;
-		} else if (codeNum >= 400 && codeNum < 500) {
-			statusBg = 'bg-amber-500/10 border border-amber-500/25 text-amber-400';
-		} else if (codeNum >= 500 && codeNum < 600) {
-			statusBg = 'bg-rose-500/10 border border-rose-500/25 text-rose-400';
 		}
 	}
 
@@ -364,28 +362,46 @@ function renderReport(results, falsePositiveMode = false) {
 
 	let html = '';
 
+	const bypassedTests = results.filter((r) => {
+		const s = parseInt(String(r.status), 10);
+		if (falsePositiveMode) {
+			return s === 403;
+		}
+		return s === 200 || s === 500;
+	}).length;
+	const isProtected = bypassedTests === 0;
+
 	// Add visual indicator for test mode with explanation
 	if (falsePositiveMode) {
+		const fpStatusBadge = isProtected
+			? `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 tracking-wide uppercase"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>Optimal (0 Blocked)</span>`
+			: `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-500/10 border border-rose-500/30 text-rose-400 tracking-wide uppercase"><span class="w-1.5 h-1.5 rounded-full bg-rose-400 animate-pulse"></span>Warning (${bypassedTests} False Positives)</span>`;
+		const fpIconColor = isProtected ? 'text-emerald-400' : 'text-rose-400';
+		const fpIconBoxBg = isProtected ? 'bg-emerald-500/10 border-emerald-500/25' : 'bg-rose-500/10 border-rose-500/25';
+
 		html += `<div class="flex items-center justify-between mb-4 p-4 bg-cyber-card border border-white/[0.08] rounded-2xl shadow-none flex-wrap gap-3">
 			<div class="flex items-center gap-3">
-				<div class="w-10 h-10 rounded-xl bg-cyber-elevated border border-white/[0.08] flex items-center justify-center text-slate-300">
-					<svg class="w-5 h-5 text-cyber-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<div class="w-10 h-10 rounded-xl ${fpIconBoxBg} border flex items-center justify-center ${fpIconColor}">
+					<svg class="w-5 h-5 ${fpIconColor}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
 					</svg>
 				</div>
 				<div>
-					<h3 class="text-sm font-bold text-white tracking-tight">False Positive Test</h3>
+					<div class="flex items-center gap-2.5">
+						<h3 class="text-sm font-bold text-white tracking-tight">False Positive Test</h3>
+						${fpStatusBadge}
+					</div>
 					<p class="text-xs text-slate-400">Testing if legitimate traffic is being blocked by the WAF</p>
 				</div>
 			</div>
 			<div class="flex items-center gap-2 flex-wrap text-xs">
 				<span class="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-[#181923] border border-white/[0.08] rounded-[10px] text-xs font-medium text-slate-300">
 					<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"></span>
-					<span>200 = Allowed</span>
+					<span>200 = Allowed (Green)</span>
 				</span>
 				<span class="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-[#181923] border border-white/[0.08] rounded-[10px] text-xs font-medium text-slate-300">
 					<span class="w-1.5 h-1.5 rounded-full bg-rose-400 shrink-0"></span>
-					<span>403 = Blocked</span>
+					<span>403 = Blocked (Red)</span>
 				</span>
 				<span class="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-[#181923] border border-white/[0.08] rounded-[10px] text-xs font-medium text-slate-300">
 					<span class="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0"></span>
@@ -404,26 +420,35 @@ function renderReport(results, falsePositiveMode = false) {
 			</p>
 		</div>`;
 	} else {
+		const statusBadge = isProtected
+			? `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 tracking-wide uppercase"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>Protected</span>`
+			: `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-500/10 border border-rose-500/30 text-rose-400 tracking-wide uppercase"><span class="w-1.5 h-1.5 rounded-full bg-rose-400 animate-pulse"></span>Vulnerable (${bypassedTests} Bypassed)</span>`;
+		const iconColor = isProtected ? 'text-emerald-400' : 'text-rose-400';
+		const iconBoxBg = isProtected ? 'bg-emerald-500/10 border-emerald-500/25' : 'bg-rose-500/10 border-rose-500/25';
+
 		html += `<div class="flex items-center justify-between mb-4 p-4 bg-cyber-card border border-white/[0.08] rounded-2xl shadow-none flex-wrap gap-3">
 			<div class="flex items-center gap-3">
-				<div class="w-10 h-10 rounded-xl bg-cyber-elevated border border-white/[0.08] flex items-center justify-center text-slate-300">
-					<svg class="w-5 h-5 text-cyber-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<div class="w-10 h-10 rounded-xl ${iconBoxBg} border flex items-center justify-center ${iconColor}">
+					<svg class="w-5 h-5 ${iconColor}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
 					</svg>
 				</div>
 				<div>
-					<h3 class="text-sm font-bold text-white tracking-tight">Security Test Complete</h3>
+					<div class="flex items-center gap-2.5">
+						<h3 class="text-sm font-bold text-white tracking-tight">Security Test Complete</h3>
+						${statusBadge}
+					</div>
 					<p class="text-xs text-slate-400">WAF protection analysis results</p>
 				</div>
 			</div>
 			<div class="flex items-center gap-2 flex-wrap text-xs">
 				<span class="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-[#181923] border border-white/[0.08] rounded-[10px] text-xs font-medium text-slate-300">
 					<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"></span>
-					<span>403 = Protected</span>
+					<span>4xx = Protected (Green)</span>
 				</span>
 				<span class="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-[#181923] border border-white/[0.08] rounded-[10px] text-xs font-medium text-slate-300">
 					<span class="w-1.5 h-1.5 rounded-full bg-rose-400 shrink-0"></span>
-					<span>200 = Vulnerable</span>
+					<span>200/500 = Vulnerable (Red)</span>
 				</span>
 				<span class="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-[#181923] border border-white/[0.08] rounded-[10px] text-xs font-medium text-slate-300">
 					<span class="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0"></span>
@@ -437,8 +462,8 @@ function renderReport(results, falsePositiveMode = false) {
 		<div class="mb-4 p-3.5 bg-[#13141c] border border-white/[0.08] rounded-xl">
 			<p class="text-xs text-slate-400 leading-relaxed mb-0">
 				<strong class="text-slate-200 font-semibold">What are these tests?</strong> This test sends <strong class="text-slate-200">malicious payloads</strong> (SQL Injection, XSS, etc.) to check if your WAF blocks them.
-				<strong class="text-emerald-400">Status 403 (green)</strong> means the WAF detected and blocked the attack.
-				<strong class="text-rose-400">Status 200 (red)</strong> means the attack succeeded - your application is <strong class="text-rose-400">vulnerable</strong> and the WAF did not protect it.
+				<strong class="text-emerald-400">Status 4xx (green)</strong> means the WAF detected and blocked the attack.
+				<strong class="text-rose-400">Status 200/500 (red)</strong> means the attack succeeded - your application is <strong class="text-rose-400">vulnerable</strong> and the WAF did not protect it.
 				<strong class="text-amber-400">Status 3xx (orange)</strong> means the server redirected the request. This could indicate the WAF is redirecting to a block page (good), or the server is redirecting normally (requires investigation). Check the redirect location to determine if it's a block page or a normal redirect.
 			</p>
 		</div>`;
