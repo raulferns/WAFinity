@@ -1092,6 +1092,9 @@ async function fetchResults() {
 							if (data.waf && data.waf.detected) {
 								detectedWAFType = data.waf.wafType;
 								window.detectedWAF = detectedWAFType;
+								if (typeof window.selectPPOWafProfile === 'function') {
+									window.selectPPOWafProfile(detectedWAFType);
+								}
 							}
 						} else if (data.type === 'complete') {
 							streamComplete = true;
@@ -1161,6 +1164,9 @@ async function fetchResults() {
 		btn.disabled = false;
 		btn.textContent = oldText;
 		hideProgress();
+		if (typeof window.refreshPPODashboardWidget === 'function') {
+			window.refreshPPODashboardWidget();
+		}
 	}
 }
 
