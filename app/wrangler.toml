@@ -1,7 +1,6 @@
-name = "waf-checker-deploy-2026"
+name = "wafinity"
 main = "src/api.ts"
 compatibility_date = "2025-02-05"
-account_id = "24c9335e645b85d12b204655e4d2c7bd"
 [assets]
 directory = "./src/static"
 binding = "ASSETS"

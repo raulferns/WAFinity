@@ -9,13 +9,14 @@ function renderAnalyticsCards(results, falsePositiveMode = false) {
 	const totalTests = results.length;
 	const bypassedTests = results.filter((r) => {
 		const s = parseInt(String(r.status), 10);
+		const isErr = isNaN(s) || r.status === 'ERR' || r.status === 'Error';
 		if (falsePositiveMode) {
-			return s === 403;
+			return s === 403 || s === 406 || s === 429 || s === 444 || (s >= 500 && s < 600) || isErr;
 		}
-		return s === 200 || s === 500;
+		return (s >= 200 && s < 300) || (s >= 500 && s < 600) || isErr;
 	}).length;
 	const bypassRate = totalTests > 0 ? (bypassedTests / totalTests) * 100 : 0;
-	const wafEffectiveness = Math.max(0, 100 - bypassRate);
+	const wafEffectiveness = Math.max(0, Math.min(100, Math.round(100 - bypassRate)));
 
 	// Response time stats
 	let totalTime = 0,
@@ -34,10 +35,17 @@ function renderAnalyticsCards(results, falsePositiveMode = false) {
 
 	// Risk level
 	let riskLevel;
-	if (bypassRate > 75) riskLevel = 'Critical';
-	else if (bypassRate > 50) riskLevel = 'High';
-	else if (bypassRate > 25) riskLevel = 'Medium';
-	else riskLevel = 'Low';
+	if (falsePositiveMode) {
+		if (bypassRate > 30) riskLevel = 'Critical';
+		else if (bypassRate > 10) riskLevel = 'High';
+		else if (bypassRate > 0) riskLevel = 'Medium';
+		else riskLevel = 'Low';
+	} else {
+		if (bypassRate > 40) riskLevel = 'Critical';
+		else if (bypassRate > 15) riskLevel = 'High';
+		else if (bypassRate > 0) riskLevel = 'Medium';
+		else riskLevel = 'Low';
+	}
 
 	const riskTextColors = {
 		Critical: 'text-rose-400',
@@ -112,18 +120,26 @@ function renderSummary(results, falsePositiveMode = false) {
 	// Test analytics
 	const bypassedTests = results.filter((r) => {
 		const s = parseInt(String(r.status), 10);
+		const isErr = isNaN(s) || r.status === 'ERR' || r.status === 'Error';
 		if (falsePositiveMode) {
-			return s === 403;
+			return s === 403 || s === 406 || s === 429 || s === 444 || (s >= 500 && s < 600) || isErr;
 		}
-		return s === 200 || s === 500;
+		return (s >= 200 && s < 300) || (s >= 500 && s < 600) || isErr;
 	}).length;
 	const bypassRate = totalRequests > 0 ? (bypassedTests / totalRequests) * 100 : 0;
-	const wafEffectiveness = Math.max(0, 100 - bypassRate);
+	const wafEffectiveness = Math.max(0, Math.min(100, Math.round(100 - bypassRate)));
 	let riskLevel;
-	if (bypassRate > 75) riskLevel = 'Critical';
-	else if (bypassRate > 50) riskLevel = 'High';
-	else if (bypassRate > 25) riskLevel = 'Medium';
-	else riskLevel = 'Low';
+	if (falsePositiveMode) {
+		if (bypassRate > 30) riskLevel = 'Critical';
+		else if (bypassRate > 10) riskLevel = 'High';
+		else if (bypassRate > 0) riskLevel = 'Medium';
+		else riskLevel = 'Low';
+	} else {
+		if (bypassRate > 40) riskLevel = 'Critical';
+		else if (bypassRate > 15) riskLevel = 'High';
+		else if (bypassRate > 0) riskLevel = 'Medium';
+		else riskLevel = 'Low';
+	}
 
 	const riskTextColors = {
 		Critical: 'text-rose-400',

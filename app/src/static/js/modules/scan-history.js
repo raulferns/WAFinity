@@ -16,11 +16,14 @@ function saveScanToHistory(session) {
 	const isFP = session.settings?.falsePositiveTest;
 	const bypassed = session.results.filter((r) => {
 		const s = parseInt(String(r.status), 10);
-		if (isFP) return s === 403;
-		return s === 200 || s === 500;
+		const isErr = isNaN(s) || r.status === 'ERR' || r.status === 'Error';
+		if (isFP) {
+			return s === 403 || s === 406 || s === 429 || s === 444 || (s >= 500 && s < 600) || isErr;
+		}
+		return (s >= 200 && s < 300) || (s >= 500 && s < 600) || isErr;
 	}).length;
 	const bypassRate = totalTests > 0 ? Math.round((bypassed / totalTests) * 100) : 0;
-	const effectiveness = 100 - bypassRate;
+	const effectiveness = Math.max(0, Math.min(100, 100 - bypassRate));
 
 	// Response time stats
 	let totalTime = 0,

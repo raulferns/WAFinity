@@ -961,30 +961,41 @@ aside {
 	width: 24rem;
 	min-width: 24rem;
 	flex-shrink: 0;
-	min-height: 0;          /* allow flex child to shrink & enable overflow scroll */
+	height: 100% !important;
+	max-height: 100% !important;
+	min-height: 0 !important;
 	overflow-y: auto !important;
+	overflow-x: hidden !important;
+	scrollbar-width: thin !important;
+	scrollbar-color: rgba(240, 86, 39, 0.7) rgba(12, 14, 24, 0.85) !important;
+}
+
+.aside-panel > *,
+aside > * {
+	flex-shrink: 0;
 }
 
 .aside-panel::-webkit-scrollbar,
 aside::-webkit-scrollbar {
-	width: 6px !important;
+	width: 8px !important;
 	display: block !important;
 }
 
 .aside-panel::-webkit-scrollbar-track,
 aside::-webkit-scrollbar-track {
-	background: rgba(0, 0, 0, 0.2) !important;
+	background: rgba(12, 14, 24, 0.85) !important;
+	border-left: 1px solid rgba(255, 255, 255, 0.05) !important;
 }
 
 .aside-panel::-webkit-scrollbar-thumb,
 aside::-webkit-scrollbar-thumb {
-	background: rgba(240, 86, 39, 0.45) !important;
-	border-radius: 3px !important;
+	background: rgba(240, 86, 39, 0.65) !important;
+	border-radius: 4px !important;
 }
 
 .aside-panel::-webkit-scrollbar-thumb:hover,
 aside::-webkit-scrollbar-thumb:hover {
-	background: rgba(240, 86, 39, 0.75) !important;
+	background: rgba(240, 86, 39, 0.95) !important;
 }
 
 /* Desktop: Tools grid in 4 columns */
@@ -995,7 +1006,9 @@ aside::-webkit-scrollbar-thumb:hover {
 }
 
 main {
-	min-height: 0;          /* allow flex child to shrink below content size */
+	min-height: 0 !important;
+	height: 100% !important;
+	max-height: 100% !important;
 }
 
 /* =============================================

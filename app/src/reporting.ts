@@ -81,11 +81,11 @@ export function generateVulnerabilityScores(results: TestResult[], falsePositive
     const stats = categoryStats.get(category) || { total: 0, bypassed: 0 };
     stats.total++;
 
-    // In false positive mode: 403 = bad (blocking legitimate traffic)
-    // In normal mode: 200 = bad (not blocking attacks)
+    const s = parseInt(String(result.status), 10);
+    const isErr = isNaN(s) || result.status === 'ERR' || result.status === 'Error';
     const isBypassed = falsePositiveMode
-      ? (result.status === 403 || result.status === '403')
-      : (result.status === 200 || result.status === '200');
+      ? (s === 403 || s === 406 || s === 429 || s === 444 || (s >= 500 && s < 600) || isErr)
+      : ((s >= 200 && s < 300) || (s >= 500 && s < 600) || isErr);
 
     if (isBypassed) {
       stats.bypassed++;
@@ -137,13 +137,15 @@ export function generateVulnerabilityScores(results: TestResult[], falsePositive
 export function generateExecutiveSummary(results: TestResult[], vulnerabilityScores: VulnerabilityScore[], wafDetection?: WAFDetectionResult, falsePositiveMode: boolean = false): ExecutiveSummary {
   const totalTests = results.length;
   const bypassedTests = results.filter(r => {
+    const s = parseInt(String(r.status), 10);
+    const isErr = isNaN(s) || r.status === 'ERR' || r.status === 'Error';
     if (falsePositiveMode) {
-      return r.status === 403 || r.status === '403';
+      return s === 403 || s === 406 || s === 429 || s === 444 || (s >= 500 && s < 600) || isErr;
     }
-    return r.status === 200 || r.status === '200' || r.status === 500 || r.status === '500';
+    return (s >= 200 && s < 300) || (s >= 500 && s < 600) || isErr;
   }).length;
   const bypassRate = totalTests > 0 ? (bypassedTests / totalTests) * 100 : 0;
-  const wafEffectiveness = Math.max(0, 100 - bypassRate);
+  const wafEffectiveness = Math.max(0, Math.min(100, Math.round(100 - bypassRate)));
 
   // Count vulnerabilities by severity
   const criticalVulnerabilities = vulnerabilityScores.filter(v => v.severity === 'Critical').length;
@@ -155,18 +157,34 @@ export function generateExecutiveSummary(results: TestResult[], vulnerabilitySco
   let riskLevel: ExecutiveSummary['riskLevel'];
   let overallScore: number;
 
-  if (criticalVulnerabilities > 0 || bypassRate > 75) {
-    riskLevel = 'Critical';
-    overallScore = 10;
-  } else if (highVulnerabilities > 0 || bypassRate > 50) {
-    riskLevel = 'High';
-    overallScore = 30;
-  } else if (mediumVulnerabilities > 0 || bypassRate > 25) {
-    riskLevel = 'Medium';
-    overallScore = 60;
+  if (falsePositiveMode) {
+    if (criticalVulnerabilities > 0 || bypassRate > 30) {
+      riskLevel = 'Critical';
+      overallScore = 10;
+    } else if (highVulnerabilities > 0 || bypassRate > 10) {
+      riskLevel = 'High';
+      overallScore = 30;
+    } else if (mediumVulnerabilities > 0 || bypassRate > 0) {
+      riskLevel = 'Medium';
+      overallScore = 60;
+    } else {
+      riskLevel = 'Low';
+      overallScore = 90;
+    }
   } else {
-    riskLevel = 'Low';
-    overallScore = 90;
+    if (criticalVulnerabilities > 0 || bypassRate > 40) {
+      riskLevel = 'Critical';
+      overallScore = 10;
+    } else if (highVulnerabilities > 0 || bypassRate > 15) {
+      riskLevel = 'High';
+      overallScore = 30;
+    } else if (mediumVulnerabilities > 0 || bypassRate > 0) {
+      riskLevel = 'Medium';
+      overallScore = 60;
+    } else {
+      riskLevel = 'Low';
+      overallScore = 90;
+    }
   }
 
   // Generate recommendations
