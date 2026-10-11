@@ -48,7 +48,7 @@ function renderAnalyticsCards(results, falsePositiveMode = false) {
 	}
 
 	const riskTextColors = {
-		Critical: 'text-rose-400',
+		Critical: 'text-red-500',
 		High: 'text-amber-400',
 		Medium: 'text-amber-400',
 		Low: 'text-emerald-400',
@@ -57,7 +57,7 @@ function renderAnalyticsCards(results, falsePositiveMode = false) {
 
 	// Avg time color
 	let avgColor = 'text-slate-200';
-	if (avgTime >= SLOW_RESPONSE_THRESHOLD) avgColor = 'text-rose-400';
+	if (avgTime >= SLOW_RESPONSE_THRESHOLD) avgColor = 'text-red-500';
 	else if (avgTime >= 1000) avgColor = 'text-amber-400';
 
 	return `<div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 mb-4">
@@ -66,7 +66,7 @@ function renderAnalyticsCards(results, falsePositiveMode = false) {
 			<div class="text-[10px] text-slate-400 uppercase tracking-wider font-medium">Total Tests</div>
 		</div>
 		<div class="bg-[#13141c] border border-white/[0.08] rounded-xl p-3 text-center">
-			<div class="text-xl font-bold ${bypassedTests > 0 ? 'text-rose-400' : 'text-slate-200'} mb-0.5 font-mono tracking-tight">${bypassedTests}</div>
+			<div class="text-xl font-bold ${bypassedTests > 0 ? 'text-red-500' : 'text-slate-200'} mb-0.5 font-mono tracking-tight">${bypassedTests}</div>
 			<div class="text-[10px] text-slate-400 uppercase tracking-wider font-medium">${falsePositiveMode ? 'False Positives' : 'Bypassed'}</div>
 		</div>
 		<div class="bg-[#13141c] border border-white/[0.08] rounded-xl p-3 text-center">
@@ -142,7 +142,7 @@ function renderSummary(results, falsePositiveMode = false) {
 	}
 
 	const riskTextColors = {
-		Critical: 'text-rose-400',
+		Critical: 'text-red-500',
 		High: 'text-amber-400',
 		Medium: 'text-amber-400',
 		Low: 'text-emerald-400',
@@ -152,7 +152,7 @@ function renderSummary(results, falsePositiveMode = false) {
 	// Avg time color
 	let avgColor = 'text-slate-200';
 	if (avgTime >= SLOW_RESPONSE_THRESHOLD) {
-		avgColor = 'text-rose-400';
+		avgColor = 'text-red-500';
 	} else if (avgTime >= 1000) {
 		avgColor = 'text-amber-400';
 	}
@@ -178,7 +178,7 @@ function renderSummary(results, falsePositiveMode = false) {
 				<div class="text-[10px] text-slate-400 uppercase tracking-wider font-medium">Total Tests</div>
 			</div>
 			<div class="p-3 rounded-xl bg-[#13141c] border border-white/[0.08] text-center">
-				<div class="text-lg font-bold ${bypassedTests > 0 ? 'text-rose-400' : 'text-slate-200'} font-mono tracking-tight mb-0.5">${bypassedTests}</div>
+				<div class="text-lg font-bold ${bypassedTests > 0 ? 'text-red-500' : 'text-slate-200'} font-mono tracking-tight mb-0.5">${bypassedTests}</div>
 				<div class="text-[10px] text-slate-400 uppercase tracking-wider font-medium">${falsePositiveMode ? 'False Positives' : 'Bypassed'}</div>
 			</div>
 		</div>
@@ -220,7 +220,7 @@ function renderSummary(results, falsePositiveMode = false) {
 			if (codeNum >= 200 && codeNum < 300) {
 				dotColor = 'bg-emerald-400';
 			} else if (codeNum === 403) {
-				dotColor = 'bg-rose-400';
+				dotColor = 'bg-red-500';
 			} else if (codeNum >= 300 && codeNum < 400) {
 				dotColor = 'bg-amber-400';
 			} else if (codeNum >= 400 && codeNum < 500) {
@@ -230,7 +230,7 @@ function renderSummary(results, falsePositiveMode = false) {
 			if (codeNum >= 400 && codeNum < 500) {
 				dotColor = 'bg-emerald-400';
 			} else if ((codeNum >= 200 && codeNum < 300) || (codeNum >= 500 && codeNum < 600)) {
-				dotColor = 'bg-rose-400';
+				dotColor = 'bg-red-500';
 			} else if (codeNum >= 300 && codeNum < 400) {
 				dotColor = 'bg-amber-400';
 			}
@@ -262,19 +262,19 @@ function renderResultRow(r, falsePositiveMode = false) {
 	let statusTooltip = '';
 
 	if (isError || isNaN(codeNum)) {
-		statusBg = 'bg-rose-500/10 border border-rose-500/25 text-rose-400';
+		statusBg = 'bg-red-500/10 border border-red-500/25 text-red-500';
 	} else if (falsePositiveMode) {
 		if (codeNum >= 200 && codeNum < 300) {
 			statusBg = 'bg-emerald-500/10 border border-emerald-500/25 text-emerald-400';
 		} else if (codeNum === 403) {
-			statusBg = 'bg-rose-500/10 border border-rose-500/25 text-rose-400';
+			statusBg = 'bg-red-500/10 border border-red-500/25 text-red-500';
 		} else if (codeNum >= 300 && codeNum < 400) {
 			statusBg = 'bg-amber-500/10 border border-amber-500/25 text-amber-400';
 			statusTooltip = `title="Redirect (${codeNum}): The server redirected this request."`;
 		} else if (codeNum >= 400 && codeNum < 500) {
 			statusBg = 'bg-amber-500/10 border border-amber-500/25 text-amber-400';
 		} else if (codeNum >= 500 && codeNum < 600) {
-			statusBg = 'bg-rose-500/10 border border-rose-500/25 text-rose-400';
+			statusBg = 'bg-red-500/10 border border-red-500/25 text-red-500';
 		}
 	} else {
 		// Normal Security Test:
@@ -284,7 +284,7 @@ function renderResultRow(r, falsePositiveMode = false) {
 		if (codeNum >= 400 && codeNum < 500) {
 			statusBg = 'bg-emerald-500/10 border border-emerald-500/25 text-emerald-400';
 		} else if ((codeNum >= 200 && codeNum < 300) || (codeNum >= 500 && codeNum < 600)) {
-			statusBg = 'bg-rose-500/10 border border-rose-500/25 text-rose-400';
+			statusBg = 'bg-red-500/10 border border-red-500/25 text-red-500';
 		} else if (codeNum >= 300 && codeNum < 400) {
 			statusBg = 'bg-amber-500/10 border border-amber-500/25 text-amber-400';
 			statusTooltip = `title="Redirect (${codeNum}): The server redirected this request."`;
@@ -395,9 +395,9 @@ function renderReport(results, falsePositiveMode = false) {
 	if (falsePositiveMode) {
 		const fpStatusBadge = isProtected
 			? `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 tracking-wide uppercase"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>Optimal (0 Blocked)</span>`
-			: `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-500/10 border border-rose-500/30 text-rose-400 tracking-wide uppercase"><span class="w-1.5 h-1.5 rounded-full bg-rose-400 animate-pulse"></span>Warning (${bypassedTests} False Positives)</span>`;
-		const fpIconColor = isProtected ? 'text-emerald-400' : 'text-rose-400';
-		const fpIconBoxBg = isProtected ? 'bg-emerald-500/10 border-emerald-500/25' : 'bg-rose-500/10 border-rose-500/25';
+			: `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-500/10 border border-red-500/30 text-red-500 tracking-wide uppercase"><span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>Warning (${bypassedTests} False Positives)</span>`;
+		const fpIconColor = isProtected ? 'text-emerald-400' : 'text-red-500';
+		const fpIconBoxBg = isProtected ? 'bg-emerald-500/10 border-emerald-500/25' : 'bg-red-500/10 border-red-500/25';
 
 		html += `<div class="flex items-center justify-between mb-4 p-4 bg-cyber-card border border-white/[0.08] rounded-2xl shadow-none flex-wrap gap-3">
 			<div class="flex items-center gap-3">
@@ -420,7 +420,7 @@ function renderReport(results, falsePositiveMode = false) {
 					<span>200 = Allowed (Green)</span>
 				</span>
 				<span class="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-[#181923] border border-white/[0.08] rounded-[10px] text-xs font-medium text-slate-300">
-					<span class="w-1.5 h-1.5 rounded-full bg-rose-400 shrink-0"></span>
+					<span class="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0"></span>
 					<span>403 = Blocked (Red)</span>
 				</span>
 				<span class="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-[#181923] border border-white/[0.08] rounded-[10px] text-xs font-medium text-slate-300">
@@ -435,16 +435,16 @@ function renderReport(results, falsePositiveMode = false) {
 		<div class="mb-4 p-3.5 bg-[#13141c] border border-white/[0.08] rounded-xl">
 			<p class="text-xs text-slate-400 leading-relaxed mb-0">
 				<strong class="text-cyber-accent font-semibold">What is a False Positive Test?</strong> This test uses <strong class="text-slate-200">legitimate, safe payloads</strong> to check if your WAF is blocking normal traffic.
-				If you see <strong class="text-rose-400">403 (red)</strong>, it means legitimate requests are being blocked - this is a <strong class="text-rose-400">false positive</strong> and should be investigated.
+				If you see <strong class="text-red-500">403 (red)</strong>, it means legitimate requests are being blocked - this is a <strong class="text-red-500">false positive</strong> and should be investigated.
 				<strong class="text-amber-400">Status 3xx (orange)</strong> means the server redirected the request. This could be a normal redirect or the WAF redirecting to a block page. Check the redirect location to determine if legitimate traffic is being redirected unnecessarily.
 			</p>
 		</div>`;
 	} else {
 		const statusBadge = isProtected
 			? `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 tracking-wide uppercase"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>Protected</span>`
-			: `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-500/10 border border-rose-500/30 text-rose-400 tracking-wide uppercase"><span class="w-1.5 h-1.5 rounded-full bg-rose-400 animate-pulse"></span>Vulnerable (${bypassedTests} Bypassed)</span>`;
-		const iconColor = isProtected ? 'text-emerald-400' : 'text-rose-400';
-		const iconBoxBg = isProtected ? 'bg-emerald-500/10 border-emerald-500/25' : 'bg-rose-500/10 border-rose-500/25';
+			: `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-500/10 border border-red-500/30 text-red-500 tracking-wide uppercase"><span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>Vulnerable (${bypassedTests} Bypassed)</span>`;
+		const iconColor = isProtected ? 'text-emerald-400' : 'text-red-500';
+		const iconBoxBg = isProtected ? 'bg-emerald-500/10 border-emerald-500/25' : 'bg-red-500/10 border-red-500/25';
 
 		html += `<div class="flex items-center justify-between mb-4 p-4 bg-cyber-card border border-white/[0.08] rounded-2xl shadow-none flex-wrap gap-3">
 			<div class="flex items-center gap-3">
@@ -467,7 +467,7 @@ function renderReport(results, falsePositiveMode = false) {
 					<span>4xx = Protected (Green)</span>
 				</span>
 				<span class="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-[#181923] border border-white/[0.08] rounded-[10px] text-xs font-medium text-slate-300">
-					<span class="w-1.5 h-1.5 rounded-full bg-rose-400 shrink-0"></span>
+					<span class="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0"></span>
 					<span>200/500 = Vulnerable (Red)</span>
 				</span>
 				<span class="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-[#181923] border border-white/[0.08] rounded-[10px] text-xs font-medium text-slate-300">
@@ -483,7 +483,7 @@ function renderReport(results, falsePositiveMode = false) {
 			<p class="text-xs text-slate-400 leading-relaxed mb-0">
 				<strong class="text-slate-200 font-semibold">What are these tests?</strong> This test sends <strong class="text-slate-200">malicious payloads</strong> (SQL Injection, XSS, etc.) to check if your WAF blocks them.
 				<strong class="text-emerald-400">Status 4xx (green)</strong> means the WAF detected and blocked the attack.
-				<strong class="text-rose-400">Status 200/500 (red)</strong> means the attack succeeded - your application is <strong class="text-rose-400">vulnerable</strong> and the WAF did not protect it.
+				<strong class="text-red-500">Status 200/500 (red)</strong> means the attack succeeded - your application is <strong class="text-red-500">vulnerable</strong> and the WAF did not protect it.
 				<strong class="text-amber-400">Status 3xx (orange)</strong> means the server redirected the request. This could indicate the WAF is redirecting to a block page (good), or the server is redirecting normally (requires investigation). Check the redirect location to determine if it's a block page or a normal redirect.
 			</p>
 		</div>`;

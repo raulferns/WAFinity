@@ -268,7 +268,7 @@ function renderAPIDocsContent() {
 								${ep.params
 									.map(
 										(p) => `<tr style="border-bottom:1px solid #1e293b10">
-									<td style="padding:5px 10px;white-space:nowrap"><code style="color:${p.required ? '#f05627' : '#94a3b8'};font-weight:${p.required ? '600' : '400'}">${p.name}</code>${p.required ? '<span style="color:#f43f5e;font-size:8px;margin-left:3px">*</span>' : ''}</td>
+									<td style="padding:5px 10px;white-space:nowrap"><code style="color:${p.required ? '#f05627' : '#94a3b8'};font-weight:${p.required ? '600' : '400'}">${p.name}</code>${p.required ? '<span style="color:#ef4444;font-size:8px;margin-left:3px">*</span>' : ''}</td>
 									<td style="padding:5px 10px;color:#64748b;font-family:monospace;font-size:.65rem">${p.type}</td>
 									<td style="padding:5px 10px;color:#94a3b8">${p.desc}${p.default ? ` <span style="color:#64748b">(default: ${p.default})</span>` : ''}</td>
 								</tr>`,
@@ -281,7 +281,7 @@ function renderAPIDocsContent() {
 		} else {
 			html += `
 				<div style="font-size:.65rem;color:#94a3b8;margin-bottom:10px">
-					Parameter: <code style="color:#f05627;font-weight:600">url</code><span style="color:#f43f5e;font-size:8px;margin-left:2px">*</span> <span style="color:#64748b">(string)</span>
+					Parameter: <code style="color:#f05627;font-weight:600">url</code><span style="color:#ef4444;font-size:8px;margin-left:2px">*</span> <span style="color:#64748b">(string)</span>
 				</div>`;
 		}
 

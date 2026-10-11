@@ -384,7 +384,7 @@ function displayHTTPManipulationResults(data) {
 				<span>403 = Protected</span>
 			</span>
 			<span class="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-[#181923] border border-white/[0.08] rounded-[10px] text-xs font-medium text-slate-300">
-				<span class="w-1.5 h-1.5 rounded-full bg-rose-400 shrink-0"></span>
+				<span class="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0"></span>
 				<span>200 = Bypass</span>
 			</span>
 			<button onclick="showHttpCodesModal('httpManip')" class="px-3 py-1.5 bg-[#181923] hover:bg-[#20212d] border border-white/[0.08] hover:border-white/[0.18] rounded-[10px] text-slate-300 hover:text-white text-xs font-semibold transition-all shadow-none">
@@ -394,10 +394,10 @@ function displayHTTPManipulationResults(data) {
 	</div>
 	<div class="mb-4 p-3.5 bg-[#13141c] border border-white/[0.08] rounded-xl">
 		<p class="text-xs text-slate-400 leading-relaxed mb-0">
-			<strong class="text-slate-200 font-semibold">What is HTTP Manipulation?</strong> This test checks if your WAF can be <strong class="text-rose-400">bypassed</strong> by manipulating the HTTP protocol instead of using malicious payloads.
+			<strong class="text-slate-200 font-semibold">What is HTTP Manipulation?</strong> This test checks if your WAF can be <strong class="text-red-500">bypassed</strong> by manipulating the HTTP protocol instead of using malicious payloads.
 			It tests techniques like <strong class="text-slate-200">HTTP Verb Tampering</strong> (using non-standard methods like PATCH, TRACE), <strong class="text-slate-200">Parameter Pollution</strong> (sending duplicate parameters), and <strong class="text-slate-200">Content-Type Confusion</strong>.
 			<strong class="text-emerald-400">Status 403 (green)</strong> means the WAF blocked the manipulation.
-			<strong class="text-rose-400">Status 200 (red)</strong> means the request succeeded - the WAF can be <strong class="text-rose-400">bypassed</strong> with this technique.
+			<strong class="text-red-500">Status 200 (red)</strong> means the request succeeded - the WAF can be <strong class="text-red-500">bypassed</strong> with this technique.
 		</p>
 	</div>
 
@@ -425,7 +425,7 @@ function displayHTTPManipulationResults(data) {
 			if (isError || isNaN(codeNum)) {
 				statusBg = 'bg-amber-500/10 border border-amber-500/25 text-amber-400';
 			} else if (codeNum >= 200 && codeNum < 300) {
-				statusBg = 'bg-rose-500/10 border border-rose-500/25 text-rose-400';
+				statusBg = 'bg-red-500/10 border border-red-500/25 text-red-500';
 			} else if (codeNum === 403) {
 				statusBg = 'bg-emerald-500/10 border border-emerald-500/25 text-emerald-400';
 			} else if (codeNum >= 300 && codeNum < 400) {
@@ -440,7 +440,7 @@ function displayHTTPManipulationResults(data) {
 			if (!isError && !isNaN(codeNum)) {
 				if (codeNum >= 200 && codeNum < 300) {
 					resultText = 'Potential Bypass';
-					resultBg = 'bg-rose-500/10 border border-rose-500/25 text-rose-400';
+					resultBg = 'bg-red-500/10 border border-red-500/25 text-red-500';
 				} else if (codeNum === 403) {
 					resultText = 'Blocked';
 					resultBg = 'bg-emerald-500/10 border border-emerald-500/25 text-emerald-400';

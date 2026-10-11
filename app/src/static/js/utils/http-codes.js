@@ -248,7 +248,7 @@ const HTTP_CODES_DATA = [
 		normal: 'Cloudflare 520 - Origin server returned an empty, unknown, or unexpected response to Cloudflare WAF',
 		falsePositive: '<strong class="text-cyber-danger">CLOUDFLARE ERROR</strong> - Origin server returned an empty, unknown, or unexpected response to Cloudflare WAF',
 		httpManip: 'Cloudflare 520 - Manipulation corrupted origin HTTP response stream',
-		bg: 'bg-rose-500/5',
+		bg: 'bg-red-500/5',
 	},
 	{
 		code: '521',
@@ -257,7 +257,7 @@ const HTTP_CODES_DATA = [
 		normal: 'Cloudflare 521 - Origin web server refused TCP connection on port 80/443 (origin down or firewall blocked Cloudflare)',
 		falsePositive: '<strong class="text-cyber-danger">ORIGIN DOWN</strong> - Origin web server refused TCP connection from Cloudflare edge proxy',
 		httpManip: 'Cloudflare 521 - Origin refused connection from edge proxy',
-		bg: 'bg-rose-500/5',
+		bg: 'bg-red-500/5',
 	},
 	{
 		code: '522',
@@ -266,7 +266,7 @@ const HTTP_CODES_DATA = [
 		normal: 'Cloudflare 522 - TCP handshake between Cloudflare WAF and origin timed out (routing/firewall packet drop)',
 		falsePositive: '<strong class="text-cyber-danger">TCP TIMEOUT</strong> - Cloudflare attempted TCP connection to origin server, but the handshake timed out',
 		httpManip: 'Cloudflare 522 - TCP handshake timed out between edge and origin',
-		bg: 'bg-rose-500/5',
+		bg: 'bg-red-500/5',
 	},
 	{
 		code: '523',
@@ -275,7 +275,7 @@ const HTTP_CODES_DATA = [
 		normal: 'Cloudflare 523 - Cloudflare could not reach origin server due to routing / BGP / DNS resolution failure',
 		falsePositive: '<strong class="text-cyber-danger">UNREACHABLE</strong> - Cloudflare could not reach origin server due to network routing or DNS resolution failure',
 		httpManip: 'Cloudflare 523 - Origin network path unreachable',
-		bg: 'bg-rose-500/5',
+		bg: 'bg-red-500/5',
 	},
 	{
 		code: '524',
@@ -284,7 +284,7 @@ const HTTP_CODES_DATA = [
 		normal: 'Cloudflare 524 - TCP connection succeeded but origin took >100s to send HTTP response (time-based injection or hang)',
 		falsePositive: '<strong class="text-cyber-danger">RESPONSE TIMEOUT</strong> - TCP connection succeeded, but origin took over 100 seconds to send HTTP response headers',
 		httpManip: 'Cloudflare 524 - Origin took too long to process manipulated request',
-		bg: 'bg-rose-500/5',
+		bg: 'bg-red-500/5',
 	},
 	{
 		code: '525',
@@ -293,7 +293,7 @@ const HTTP_CODES_DATA = [
 		normal: 'Cloudflare 525 - SSL/TLS handshake failed between Cloudflare and origin server (cipher mismatch, SNI failure, or missing cert)',
 		falsePositive: '<strong class="text-cyber-danger">SSL HANDSHAKE FAILED</strong> - SSL/TLS handshake failed between Cloudflare and origin server (cipher mismatch, missing cert, or SNI misconfiguration)',
 		httpManip: 'Cloudflare 525 - Manipulated request or SNI headers caused TLS handshake failure between edge and origin',
-		bg: 'bg-rose-500/5',
+		bg: 'bg-red-500/5',
 	},
 	{
 		code: '526',
@@ -302,7 +302,7 @@ const HTTP_CODES_DATA = [
 		normal: 'Cloudflare 526 - Origin server SSL certificate is expired, self-signed, untrusted, or domain name does not match',
 		falsePositive: '<strong class="text-cyber-danger">INVALID CERTIFICATE</strong> - Origin server TLS certificate expired, self-signed, or untrusted by Cloudflare Full (Strict)',
 		httpManip: 'Cloudflare 526 - Origin certificate rejected by Cloudflare edge',
-		bg: 'bg-rose-500/5',
+		bg: 'bg-red-500/5',
 	},
 	{
 		code: '530',
@@ -311,7 +311,7 @@ const HTTP_CODES_DATA = [
 		normal: 'Cloudflare 530 - Generic Cloudflare edge error (typically 10xx error, DNS resolution issue, or zone access restriction)',
 		falsePositive: '<strong class="text-cyber-danger">CLOUDFLARE 530</strong> - Edge error or zone access restriction triggered on request (10xx error / DNS)',
 		httpManip: 'Cloudflare 530 - Edge access restriction triggered',
-		bg: 'bg-rose-500/5',
+		bg: 'bg-red-500/5',
 	},
 
 	// --- Network / Connection Failure ---
@@ -399,16 +399,16 @@ function generateHttpCodesTable(context = 'normal') {
 				codeColor = 'text-emerald-400';
 				rowBg = 'bg-emerald-500/[0.03] hover:bg-emerald-500/[0.06]';
 			} else if (item.code === '403' || item.code.startsWith('5') || item.code === 'ERR') {
-				codeColor = 'text-rose-400';
-				rowBg = 'bg-rose-500/[0.03] hover:bg-rose-500/[0.06]';
+				codeColor = 'text-red-500';
+				rowBg = 'bg-red-500/[0.04] hover:bg-red-500/[0.08]';
 			}
 		} else {
 			if (item.code === '403') {
 				codeColor = 'text-emerald-400';
 				rowBg = 'bg-emerald-500/[0.03] hover:bg-emerald-500/[0.06]';
 			} else if (item.code.startsWith('2')) {
-				codeColor = 'text-rose-400';
-				rowBg = 'bg-rose-500/[0.03] hover:bg-rose-500/[0.06]';
+				codeColor = 'text-red-500';
+				rowBg = 'bg-red-500/[0.04] hover:bg-red-500/[0.08]';
 			}
 		}
 

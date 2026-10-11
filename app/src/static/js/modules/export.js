@@ -175,7 +175,7 @@ function generateHTMLReport(session, vulnerabilityScores, executiveSummary, fals
 	const getRiskColor = (risk) => {
 		switch (risk) {
 			case 'Critical':
-				return '#f43f5e';
+				return '#ef4444';
 			case 'High':
 				return '#f59e0b';
 			case 'Medium':
@@ -397,7 +397,7 @@ function generateHTMLReport(session, vulnerabilityScores, executiveSummary, fals
             font-weight: 700;
             font-size: 12px;
         }
-        .severity-critical { background: rgba(244, 63, 94, 0.15); color: #f43f5e; border: 1px solid rgba(244, 63, 94, 0.3); }
+        .severity-critical { background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
         .severity-high { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3); }
         .severity-medium { background: rgba(240, 86, 39, 0.15); color: #f05627; border: 1px solid rgba(240, 86, 39, 0.3); }
         .severity-low { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
@@ -494,7 +494,7 @@ function generateHTMLReport(session, vulnerabilityScores, executiveSummary, fals
                     <div class="metric-label">Total Tests</div>
                 </div>
                 <div class="metric-card">
-                    <div class="metric-value" style="color: ${executiveSummary.bypassedTests > 0 ? '#f43f5e' : '#10b981'}">${executiveSummary.bypassedTests}</div>
+                    <div class="metric-value" style="color: ${executiveSummary.bypassedTests > 0 ? '#ef4444' : '#10b981'}">${executiveSummary.bypassedTests}</div>
                     <div class="metric-label">${falsePositiveMode ? 'False Positives' : 'Bypassed'}</div>
                 </div>
             </div>
@@ -513,7 +513,7 @@ function generateHTMLReport(session, vulnerabilityScores, executiveSummary, fals
 							}
 							const avgT = results.length > 0 ? Math.round(totalTime / results.length) : 0;
 							if (minT === Infinity) minT = 0;
-							const avgColor = avgT >= 2000 ? '#f43f5e' : avgT >= 1000 ? '#f59e0b' : avgT >= 500 ? '#f59e0b' : '#10b981';
+							const avgColor = avgT >= 2000 ? '#ef4444' : avgT >= 1000 ? '#f59e0b' : avgT >= 500 ? '#f59e0b' : '#10b981';
 							return `
             <div class="metrics-grid" style="margin-top: 0;">
                 <div class="metric-card">
@@ -609,7 +609,7 @@ function generateHTMLReport(session, vulnerabilityScores, executiveSummary, fals
                             <td><strong>${escapeHtml(vuln.category)}</strong></td>
                             <td><span class="severity-badge severity-${vuln.severity.toLowerCase()}">${vuln.severity}</span></td>
                             <td>${vuln.score}/100</td>
-                            <td style="color: ${vuln.bypassRate > 50 ? '#f43f5e' : vuln.bypassRate > 20 ? '#f59e0b' : '#10b981'}; font-weight: 700;">${vuln.bypassRate}%</td>
+                            <td style="color: ${vuln.bypassRate > 50 ? '#ef4444' : vuln.bypassRate > 20 ? '#f59e0b' : '#10b981'}; font-weight: 700;">${vuln.bypassRate}%</td>
                             <td>${vuln.bypassedCount}/${vuln.totalCount}</td>
                         </tr>
                         `,
@@ -661,7 +661,7 @@ function generateHTMLReport(session, vulnerabilityScores, executiveSummary, fals
                         <tr class="result-row" style="background-color: ${bgColor}; border-left-color: ${borderColor};">
                             <td><strong>${escapeHtml(result.category || 'N/A')}</strong></td>
                             <td style="font-family: 'JetBrains Mono', monospace; color: #f05627;">${escapeHtml(result.method || 'N/A')}</td>
-                            <td><span class="status-code" style="color: ${statusClass === 'text-cyber-success' ? '#10b981' : statusClass === 'text-cyber-danger' ? '#f43f5e' : '#f59e0b'};">${escapeHtml(statusStr)}</span></td>
+                            <td><span class="status-code" style="color: ${statusClass === 'text-cyber-success' ? '#10b981' : statusClass === 'text-cyber-danger' ? '#ef4444' : '#f59e0b'};">${escapeHtml(statusStr)}</span></td>
                             <td style="color: ${(result.responseTime || 0) >= 2000 ? '#f59e0b' : '#94a3b8'}; font-weight: ${(result.responseTime || 0) >= 2000 ? '700' : '400'};">${result.responseTime || 0}ms${(result.responseTime || 0) >= 2000 ? ' <span style="background: rgba(245,158,11,0.15); color: #f59e0b; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700;">SLOW</span>' : ''}</td>
                             <td><span class="payload">${escapeHtml(result.payload || 'N/A')}</span></td>
                         </tr>
@@ -1030,7 +1030,7 @@ function exportReconHTML(type) {
                     <div class="report-info-value">${timeStr}</div>
                 </div>
                 ${data.responseTime ? `<div class="report-info-item"><div class="report-info-label">Response Time</div><div class="report-info-value">${data.responseTime}ms</div></div>` : ''}
-                ${data.grade ? `<div class="report-info-item"><div class="report-info-label">Security Grade</div><div class="report-info-value" style="font-size:24px;font-weight:700;color:${data.score >= 80 ? '#10b981' : data.score >= 50 ? '#f59e0b' : '#f43f5e'}">${data.grade}</div></div>` : ''}
+                ${data.grade ? `<div class="report-info-item"><div class="report-info-label">Security Grade</div><div class="report-info-value" style="font-size:24px;font-weight:700;color:${data.score >= 80 ? '#10b981' : data.score >= 50 ? '#f59e0b' : '#ef4444'}">${data.grade}</div></div>` : ''}
             </div>
         </div>
         <div style="margin-top:30px;">

@@ -132,7 +132,7 @@ function displaySEOResults(data) {
 					<span class="text-xs text-slate-400 uppercase font-semibold tracking-wider">Issues Found</span>
 				</div>
 				<div class="p-4 text-center hover:bg-white/[0.015] transition-colors">
-					<span class="text-2xl font-bold font-mono ${data.isHTTPS ? 'text-emerald-400' : 'text-rose-400'} block mb-1">${data.isHTTPS ? 'HTTPS' : 'HTTP'}</span>
+					<span class="text-2xl font-bold font-mono ${data.isHTTPS ? 'text-emerald-400' : 'text-red-500'} block mb-1">${data.isHTTPS ? 'HTTPS' : 'HTTP'}</span>
 					<span class="text-xs text-slate-400 uppercase font-semibold tracking-wider">Protocol (${data.statusCode})</span>
 				</div>
 			</div>
