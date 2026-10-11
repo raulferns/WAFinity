@@ -10,7 +10,8 @@
 		"start": "npm run build:css && wrangler dev",
 		"test": "vitest",
 		"cf-typegen": "wrangler types",
-		"ppo:save": "node scripts/save-ppo-weights.js"
+		"ppo:save": "node scripts/save-ppo-weights.js",
+		"ppo:train": "node scripts/train-all-wafs.js"
 	},
 	"devDependencies": {
 		"@cloudflare/vitest-pool-workers": "^0.8.19",
