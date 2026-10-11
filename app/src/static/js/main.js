@@ -1312,6 +1312,17 @@ function goHome() {
 	// Reset progress bar
 	const progressContainer = document.getElementById('progressContainer');
 	if (progressContainer) progressContainer.style.display = 'none';
+
+	// Hide export controls if visible
+	if (typeof hideExportControls === 'function') {
+		hideExportControls();
+	}
+
+	// Re-initialize PPO dashboard widget so it never stays stuck on "Loading profiles..."
+	if (typeof window.refreshPPODashboardWidget === 'function') {
+		window.refreshPPODashboardWidget();
+	}
+
 	window.scrollTo(0, 0);
 }
 

@@ -288,7 +288,7 @@ function computeProfileMetrics(prof) {
 let activeSelectedWaf = null;
 let cachedWeightsData = null;
 
-async function refreshPPODashboardWidget() {
+async function refreshPPODashboardWidget(forceFetch = false) {
 	const totalUpdatesEl = document.getElementById('ppoMetricTotalUpdates');
 	const accuracyEl = document.getElementById('ppoMetricAccuracy');
 	const actionCountEl = document.getElementById('ppoMetricActionCount');
@@ -299,9 +299,12 @@ async function refreshPPODashboardWidget() {
 	if (!totalUpdatesEl || !profilesContainer) return;
 
 	try {
-		const data = await fetchPPOWeightsData();
-		if (!data || !data.profiles) return;
-		cachedWeightsData = data;
+		let data = cachedWeightsData;
+		if (!data || forceFetch) {
+			data = await fetchPPOWeightsData();
+			if (!data || !data.profiles) return;
+			cachedWeightsData = data;
+		}
 
 		const profiles = data.profiles || {};
 		const profileKeys = Object.keys(profiles);
