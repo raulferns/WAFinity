@@ -116,6 +116,7 @@ async function startBatchTest() {
 		config.autoDetectWAF = document.getElementById('autoDetectWAF')?.checked || false;
 		config.useEncodingVariations = document.getElementById('useEncodingVariations')?.checked || false;
 		config.httpManipulation = document.getElementById('httpManipulation')?.checked || false;
+		config.adaptiveMutation = document.getElementById('adaptiveMutation')?.checked || false;
 		config.payloadTemplate = document.getElementById('payloadTemplate')?.value || '';
 		config.customHeaders = document.getElementById('customHeaders')?.value || '';
 	} else {
@@ -129,6 +130,7 @@ async function startBatchTest() {
 		config.autoDetectWAF = false;
 		config.useEncodingVariations = false;
 		config.httpManipulation = false;
+		config.adaptiveMutation = false;
 	}
 
 	try {
@@ -337,6 +339,7 @@ async function testSingleUrlClient(url, config) {
 			autoDetectWAF: config.autoDetectWAF ? '1' : '0',
 			useEncodingVariations: config.useEncodingVariations ? '1' : '0',
 			httpManipulation: config.httpManipulation ? '1' : '0',
+			adaptiveMutation: config.adaptiveMutation ? '1' : '0',
 		});
 
 		const response = await fetch(`/api/check?${params.toString()}`, {

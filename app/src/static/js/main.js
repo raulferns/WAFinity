@@ -277,6 +277,9 @@ function renderResultRow(r, falsePositiveMode = false) {
 
 	const responseTime = r.responseTime || 0;
 	const isSlow = responseTime >= SLOW_RESPONSE_THRESHOLD;
+	const adaptiveHtml = r.adaptiveMutation
+		? `<div class="mt-1 text-[10px] text-cyber-accent font-mono">PPO: ${escapeHtml(r.adaptiveMutation.actionLabel || r.adaptiveMutation.action)} (${Number(r.adaptiveMutation.reward || 0).toFixed(2)})</div>`
+		: '';
 
 	// Response time display with slow indicator
 	let timeHtml;
@@ -298,6 +301,7 @@ function renderResultRow(r, falsePositiveMode = false) {
 			<td class="px-4 py-2.5 text-center whitespace-nowrap">${timeHtml}</td>
 			<td class="px-4 py-2.5">
 				<code class="text-xs font-mono text-slate-300 bg-[#0b0c10] border border-white/[0.06] px-2.5 py-1 rounded-md break-all select-all block leading-relaxed">${escapeHtml(r.payload)}</code>
+				${adaptiveHtml}
 			</td>
 		</tr>`;
 }
@@ -872,6 +876,8 @@ async function fetchResults() {
 	const useEncodingVariations = document.getElementById('useEncodingVariations')?.checked ? true : false;
 	// HTTP Manipulation
 	const httpManipulation = document.getElementById('httpManipulation')?.checked ? true : false;
+	// Adaptive PPO payload mutation
+	const adaptiveMutation = document.getElementById('adaptiveMutation')?.checked ? true : false;
 	// Collect selected categories
 	const categoryCheckboxes = document.querySelectorAll('#categoryCheckboxes input[type=checkbox]');
 	const selectedCategories = Array.from(categoryCheckboxes)
@@ -889,6 +895,7 @@ async function fetchResults() {
 	localStorage.setItem('wafchecker_autoDetectWAF', autoDetectWAF ? '1' : '0');
 	localStorage.setItem('wafchecker_useEncodingVariations', useEncodingVariations ? '1' : '0');
 	localStorage.setItem('wafchecker_httpManipulation', httpManipulation ? '1' : '0');
+	localStorage.setItem('wafchecker_adaptiveMutation', adaptiveMutation ? '1' : '0');
 	// --- Получаем шаблон и заголовки ---\n
 	let payloadTemplate = '';
 	const templateEl = document.getElementById('payloadTemplate');
@@ -970,6 +977,7 @@ async function fetchResults() {
 			autoDetectWAF: autoDetectWAF ? '1' : '0',
 			useEncodingVariations: useEncodingVariations ? '1' : '0',
 			httpManipulation: httpManipulation ? '1' : '0',
+			adaptiveMutation: adaptiveMutation ? '1' : '0',
 			detectedWAF: detectedWAFType || '',
 		});
 
@@ -1106,6 +1114,7 @@ async function fetchResults() {
 				autoDetectWAF,
 				useEncodingVariations,
 				httpManipulation,
+				adaptiveMutation,
 			},
 		};
 
@@ -1196,6 +1205,15 @@ function restoreStateFromLocalStorage() {
 		const el = document.getElementById('httpManipulation');
 		if (el) {
 			el.checked = httpManipulation === '1';
+		}
+	}
+
+	// Adaptive PPO mutation
+	const adaptiveMutation = localStorage.getItem('wafchecker_adaptiveMutation');
+	if (adaptiveMutation !== null) {
+		const el = document.getElementById('adaptiveMutation');
+		if (el) {
+			el.checked = adaptiveMutation === '1';
 		}
 	}
 

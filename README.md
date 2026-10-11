@@ -31,6 +31,7 @@ Whether evaluating firewall rules against OWASP Top 10 vectors or conducting com
 ### 1. WAF Security Testing
 - **19+ Attack Vectors**: Automated testing for SQL Injection (SQLi), Cross-Site Scripting (XSS), Path Traversal, OS Command Injection, Server-Side Request Forgery (SSRF), NoSQL Injection, Local File Inclusion (LFI), LDAP Injection, XML External Entity (XXE), Server-Side Template Injection (SSTI), CRLF Injection, Open Redirect, and more.
 - **Advanced Bypass Techniques**: Double URL encoding, Unicode normalization, mixed-case mutation, comment obfuscation, and HTTP manipulation testing.
+- **Adaptive PPO Mutation**: Optional scan-local policy learning that chooses payload mutations from previous response rewards during authorized WAF tuning.
 - **Real-Time SSE Streaming**: Live status progression showing exact request timings, HTTP methods, payloads, and response codes.
 - **Instant Verdict Indicators**: Clear color-coded test indicators marking blocked attacks as **Protected (Green)** and bypasses as **Vulnerable (Red)**.
 - **False Positive Mode**: Test benign, everyday payloads to identify over-aggressive rules blocking legitimate user traffic.

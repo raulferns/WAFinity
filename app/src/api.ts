@@ -8,6 +8,7 @@ import {
 	generateEncodedPayloads,
 } from './advanced-payloads';
 import { HTTPManipulator, ManipulatedRequest, HTTPManipulationOptions } from './http-manipulation';
+import { AdaptiveMutationDecision, AdaptivePPOPayloadMutator } from './adaptive-mutation';
 
 // =============================================
 // RATE LIMITER (in-memory, per-IP)
@@ -70,7 +71,7 @@ function rateLimitHeaders(remaining: number, resetAt: number): Record<string, st
 }
 
 // --- Payload loading from GitHub ---
-const GITHUB_PAYLOADS_URL = 'https://raw.githubusercontent.com/PAPAMICA/waf-payloads/refs/heads/main/payloads.json';
+const GITHUB_PAYLOADS_URL = 'https://raw.githubusercontent.com/raulferns/WAFinity-payloads/refs/heads/main/payloads.json';
 let payloadsLoaded = false;
 let payloadsLoading: Promise<void> | null = null;
 
@@ -317,6 +318,8 @@ export default {
 			const useEncodingVariations = urlObj.searchParams.get('useEncodingVariations') === '1';
 			// HTTP manipulation option
 			const enableHTTPManipulation = urlObj.searchParams.get('httpManipulation') === '1';
+			// Adaptive PPO payload mutation
+			const adaptiveMutation = urlObj.searchParams.get('adaptiveMutation') === '1';
 			// Detected WAF type
 			const detectedWAF = urlObj.searchParams.get('detectedWAF') || undefined;
 
@@ -343,6 +346,7 @@ export default {
 						}
 					: undefined,
 				customPayloads,
+				adaptiveMutation,
 			);
 			return new Response(JSON.stringify(results), { headers: { 'content-type': 'application/json; charset=UTF-8' } });
 		}
@@ -447,6 +451,7 @@ export default {
 					const autoDetectWAF = urlObj.searchParams.get('autoDetectWAF') === '1';
 					const useEncodingVariations = urlObj.searchParams.get('encodingVariations') === '1';
 					const enableHTTPManipulation = urlObj.searchParams.get('httpManipulation') === '1';
+					const adaptiveMutation = urlObj.searchParams.get('adaptiveMutation') === '1';
 					const detectedWAF = urlObj.searchParams.get('detectedWAF') || undefined;
 					const payloadTemplate = urlObj.searchParams.get('payloadTemplate') || undefined;
 					const customHeaders = urlObj.searchParams.get('headers') || undefined;
@@ -476,6 +481,8 @@ export default {
 						useEncodingVariations,
 						detectedWAF || (wafResult?.wafName && wafResult.wafName !== 'Unknown' ? wafResult.wafName : undefined),
 						enableHTTPManipulation ? { enableParameterPollution: true, enableVerbTampering: true, enableContentTypeConfusion: true } : undefined,
+						undefined,
+						adaptiveMutation,
 					);
 
 					const responseData: any = {
@@ -485,6 +492,7 @@ export default {
 							followRedirect, falsePositiveTest, caseSensitiveTest,
 							enhancedPayloads: useEnhancedPayloads, advancedPayloads: useAdvancedPayloads,
 							autoDetectWAF, encodingVariations: useEncodingVariations, httpManipulation: enableHTTPManipulation,
+							adaptiveMutation,
 						},
 						totalResults: results.length,
 						results,
@@ -587,6 +595,7 @@ function getAPIDocumentation(origin: string) {
 					{ name: 'autoDetectWAF', type: '0|1', required: false, description: 'Auto-detect WAF before testing and adapt payloads (default: 0)' },
 					{ name: 'encodingVariations', type: '0|1', required: false, description: 'Use encoding variations (URL, double-URL, Unicode, etc.) (default: 0)' },
 					{ name: 'httpManipulation', type: '0|1', required: false, description: 'Enable HTTP manipulation techniques (default: 0)' },
+					{ name: 'adaptiveMutation', type: '0|1', required: false, description: 'Enable bounded PPO-style adaptive payload mutation for authorized WAF tuning (default: 0)' },
 					{ name: 'detectedWAF', type: 'string', required: false, description: 'Pre-detected WAF name to use for payload adaptation' },
 					{ name: 'payloadTemplate', type: 'string', required: false, description: 'Custom JSON body template (use {{payload}} placeholder)' },
 					{ name: 'headers', type: 'string', required: false, description: 'Custom HTTP headers (Header: value format, one per line)' },
@@ -719,6 +728,7 @@ async function handleApiCheckStream(request: Request): Promise<Response> {
 	const autoDetectWAF = urlObj.searchParams.get('autoDetectWAF') === '1';
 	const useEncodingVariations = urlObj.searchParams.get('useEncodingVariations') === '1';
 	const enableHTTPManipulation = urlObj.searchParams.get('httpManipulation') === '1';
+	const adaptiveMutation = urlObj.searchParams.get('adaptiveMutation') === '1';
 	const detectedWAF = urlObj.searchParams.get('detectedWAF') || undefined;
 
 	// Create a readable stream for SSE
@@ -816,6 +826,7 @@ async function handleApiCheckStream(request: Request): Promise<Response> {
 				}
 
 				const detectedWAFType = detectedWAF || (wafDetectionResult?.detected ? wafDetectionResult.wafType : undefined);
+				const adaptiveMutator = adaptiveMutation ? new AdaptivePPOPayloadMutator(falsePositiveTest) : undefined;
 
 				// Build all test requests
 				for (const [category, info] of payloadEntries) {
@@ -840,15 +851,7 @@ async function handleApiCheckStream(request: Request): Promise<Response> {
 
 							for (const currentPayload of payloadVariations) {
 								for (const method of methods) {
-									let headersObj = customHeaders ? processCustomHeaders(customHeaders, currentPayload) : undefined;
-									let finalPayload = currentPayload;
-									if (enableHTTPManipulation) {
-										const pollutedPayloads = generateHTTPManipulationPayloads(currentPayload, 'pollution');
-										if (pollutedPayloads.length > 1) {
-											finalPayload = pollutedPayloads[1];
-										}
-									}
-									testRequests.push({ category, payload: finalPayload, method, headersObj, checkType });
+									testRequests.push({ category, payload: currentPayload, method, checkType });
 								}
 							}
 						}
@@ -902,32 +905,66 @@ async function handleApiCheckStream(request: Request): Promise<Response> {
 							let finalUrl = url;
 							let finalMethod = req.method;
 							let finalPayload: string | undefined = req.payload;
+							let originalPayload = req.payload;
+							let adaptiveDecision: AdaptiveMutationDecision | undefined;
+							let adaptiveUpdate:
+								| { reward: number; updatedProbability: number; valueEstimate: number }
+								| undefined;
+							let headersObj = req.headersObj;
 
 							if (req.checkType === 'FileCheck') {
 								finalUrl = req.payload;
 								finalPayload = undefined;
+							} else if (req.checkType === 'ParamCheck' && finalPayload !== undefined) {
+								if (adaptiveMutator) {
+									adaptiveDecision = adaptiveMutator.mutate(finalPayload);
+									originalPayload = adaptiveDecision.originalPayload;
+									finalPayload = adaptiveDecision.payload;
+								}
+								if (enableHTTPManipulation) {
+									const pollutedPayloads = generateHTTPManipulationPayloads(finalPayload, 'pollution');
+									if (pollutedPayloads.length > 1) {
+										finalPayload = pollutedPayloads[1];
+									}
+								}
+								headersObj = customHeaders ? processCustomHeaders(customHeaders, finalPayload) : headersObj;
 							}
 
 							const res = await sendRequest(
 								finalUrl,
 								finalMethod,
 								finalPayload,
-								req.headersObj,
+								headersObj,
 								payloadTemplate,
 								followRedirect,
 								useEnhancedPayloads,
 								detectedWAFType,
 							);
 
+							if (adaptiveMutator && adaptiveDecision && res) {
+								adaptiveUpdate = adaptiveMutator.update(adaptiveDecision, res.status);
+							}
+
 							const result = {
 								category: req.category,
-								payload: req.payload,
+								payload: finalPayload ?? req.payload,
+								originalPayload,
 								method: req.method,
 								status: res ? res.status : 'ERR',
 								is_redirect: res ? res.is_redirect : false,
 								responseTime: res ? res.responseTime : 0,
 								wafDetected: wafDetectionResult?.detected || false,
 								wafType: detectedWAFType || 'Unknown',
+								adaptiveMutation: adaptiveDecision && adaptiveUpdate
+									? {
+											action: adaptiveDecision.action,
+											actionLabel: adaptiveDecision.actionLabel,
+											reward: adaptiveUpdate.reward,
+											oldProbability: Number(adaptiveDecision.oldProbability.toFixed(4)),
+											updatedProbability: Number(adaptiveUpdate.updatedProbability.toFixed(4)),
+											valueEstimate: Number(adaptiveUpdate.valueEstimate.toFixed(4)),
+										}
+									: undefined,
 							};
 
 							completedCount++;
@@ -988,6 +1025,7 @@ async function handleApiCheckFiltered(
 	detectedWAF?: string,
 	httpManipulation?: HTTPManipulationOptions,
 	customPayloads?: Record<string, { type: string; payloads: string[]; falsePayloads: string[]; _deleted?: boolean }>,
+	adaptiveMutation: boolean = false,
 ): Promise<any[]> {
 	const METHODS = methods && methods.length ? methods : ['GET'];
 	const results: any[] = [];
@@ -1084,6 +1122,7 @@ async function handleApiCheckFiltered(
 		categories && categories.length
 			? Object.entries(payloadSource).filter(([cat]) => categories.includes(cat))
 			: Object.entries(payloadSource);
+	const adaptiveMutator = adaptiveMutation ? new AdaptivePPOPayloadMutator(falsePositiveTest) : undefined;
 	for (const [category, info] of payloadEntries) {
 		const checkType = info.type || 'ParamCheck';
 		const payloads = falsePositiveTest ? info.falsePayloads || [] : info.payloads || [];
@@ -1115,18 +1154,27 @@ async function handleApiCheckFiltered(
 					for (const method of METHODS) {
 						if (offset >= end) return results;
 						if (offset >= start) {
-							// Process custom headers if provided
-							let headersObj = customHeaders ? processCustomHeaders(customHeaders, currentPayload) : undefined;
+							let adaptiveDecision: AdaptiveMutationDecision | undefined;
+							let adaptiveUpdate:
+								| { reward: number; updatedProbability: number; valueEstimate: number }
+								| undefined;
+							let finalPayload = currentPayload;
+							if (adaptiveMutator) {
+								adaptiveDecision = adaptiveMutator.mutate(currentPayload);
+								finalPayload = adaptiveDecision.payload;
+							}
 
 							// Apply HTTP manipulation if enabled
-							let finalPayload = currentPayload;
 							let finalMethod = method;
 							if (httpManipulation?.enableParameterPollution) {
-								const pollutedPayloads = generateHTTPManipulationPayloads(currentPayload, 'pollution');
+								const pollutedPayloads = generateHTTPManipulationPayloads(finalPayload, 'pollution');
 								if (pollutedPayloads.length > 1) {
 									finalPayload = pollutedPayloads[1]; // Use first variation
 								}
 							}
+
+							// Process custom headers if provided
+							let headersObj = customHeaders ? processCustomHeaders(customHeaders, finalPayload) : undefined;
 
 							const detectedWAFType = detectedWAF || (wafDetectionResult?.detected ? wafDetectionResult.wafType : undefined);
 
@@ -1140,17 +1188,32 @@ async function handleApiCheckFiltered(
 								useEnhancedPayloads,
 								detectedWAFType,
 							);
+							if (adaptiveMutator && adaptiveDecision && res) {
+								adaptiveUpdate = adaptiveMutator.update(adaptiveDecision, res.status);
+							}
 							results.push({
 								category,
-								payload: currentPayload,
-								originalPayload: payload, // Keep track of original
+								payload: finalPayload,
+								originalPayload: adaptiveDecision ? adaptiveDecision.originalPayload : payload,
 								method,
 								status: res ? res.status : 'ERR',
 								is_redirect: res ? res.is_redirect : false,
 								responseTime: res ? res.responseTime : 0,
 								wafDetected: wafDetectionResult?.detected || false,
 								wafType: detectedWAFType || 'Unknown',
-								bypassTechnique: currentPayload !== payload ? 'Advanced' : 'Standard',
+								bypassTechnique: adaptiveDecision
+									? 'Adaptive PPO'
+									: currentPayload !== payload ? 'Advanced' : 'Standard',
+								adaptiveMutation: adaptiveDecision && adaptiveUpdate
+									? {
+											action: adaptiveDecision.action,
+											actionLabel: adaptiveDecision.actionLabel,
+											reward: adaptiveUpdate.reward,
+											oldProbability: Number(adaptiveDecision.oldProbability.toFixed(4)),
+											updatedProbability: Number(adaptiveUpdate.updatedProbability.toFixed(4)),
+											valueEstimate: Number(adaptiveUpdate.valueEstimate.toFixed(4)),
+										}
+									: undefined,
 							});
 						}
 						offset++;
@@ -1810,6 +1873,7 @@ async function testSingleUrlForBatch(url: string, config: any): Promise<any[]> {
 			autoDetectWAF: config.autoDetectWAF ? '1' : '0',
 			useEncodingVariations: config.useEncodingVariations ? '1' : '0',
 			httpManipulation: config.httpManipulation ? '1' : '0',
+			adaptiveMutation: config.adaptiveMutation ? '1' : '0',
 		});
 
 		try {
@@ -1835,6 +1899,8 @@ async function testSingleUrlForBatch(url: string, config: any): Promise<any[]> {
 							enableContentTypeConfusion: true,
 						}
 					: undefined,
+				undefined,
+				config.adaptiveMutation || false,
 			);
 
 			if (!results || !results.length) {
