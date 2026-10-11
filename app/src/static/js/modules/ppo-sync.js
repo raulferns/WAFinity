@@ -352,7 +352,7 @@ function renderSelectedProfilePolicy(wafName) {
 	const updateCount = prof?.updateCount || prof?.totalUpdates || 1500;
 
 	if (selectedWafStats) {
-		selectedWafStats.textContent = `${updateCount.toLocaleString()} Steps • Bypass Rate: ${bench.bypassRate}% • Accuracy: ${bench.accuracy}%`;
+		selectedWafStats.textContent = `Accuracy: ${bench.accuracy}%`;
 	}
 
 	// Calculate softmax probabilities from actor weights
