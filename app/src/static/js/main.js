@@ -488,14 +488,6 @@ function renderReport(results, falsePositiveMode = false) {
 					Show all HTTP codes
 				</button>
 			</div>
-		</div>
-		<div class="mb-4 p-3.5 bg-[#13141c] border border-white/[0.08] rounded-xl">
-			<p class="text-xs text-slate-400 leading-relaxed mb-0">
-				<strong class="text-slate-200 font-semibold">What are these tests?</strong> This test sends <strong class="text-slate-200">malicious payloads</strong> (SQL Injection, XSS, etc.) to check if your WAF blocks them.
-				<strong class="text-emerald-400">Status 4xx (green)</strong> means the WAF detected and blocked the attack.
-				<strong class="text-red-500">Status 200/500 (red)</strong> means the attack succeeded - your application is <strong class="text-red-500">vulnerable</strong> and the WAF did not protect it.
-				<strong class="text-amber-400">Status 3xx (orange)</strong> means the server redirected the request. This could indicate the WAF is redirecting to a block page (good), or the server is redirecting normally (requires investigation). Check the redirect location to determine if it's a block page or a normal redirect.
-			</p>
 		</div>`;
 	}
 
