@@ -441,7 +441,7 @@
 									</div>
 								</div>
 								<div class="flex items-baseline mt-1">
-									<span class="text-2xl font-bold tracking-tight text-white font-mono" id="ppoMetricAccuracy">78.4%</span>
+									<span class="text-2xl font-bold tracking-tight text-white font-mono" id="ppoMetricAccuracy">&mdash;</span>
 								</div>
 							</div>
 
@@ -457,7 +457,7 @@
 									</div>
 								</div>
 								<div class="flex items-baseline mt-1">
-									<span class="text-2xl font-bold tracking-tight text-cyber-accent font-mono" id="ppoMetricTotalUpdates">15,000</span>
+									<span class="text-2xl font-bold tracking-tight text-cyber-accent font-mono" id="ppoMetricTotalUpdates">&mdash;</span>
 								</div>
 							</div>
 
@@ -472,7 +472,7 @@
 									</div>
 								</div>
 								<div class="flex items-baseline mt-1">
-									<span class="text-2xl font-bold tracking-tight text-white font-mono">16</span>
+									<span class="text-2xl font-bold tracking-tight text-white font-mono" id="ppoMetricActionCount">&mdash;</span>
 								</div>
 							</div>
 
@@ -487,7 +487,7 @@
 									</div>
 								</div>
 								<div class="flex items-baseline mt-1">
-									<span class="text-2xl font-bold tracking-tight text-white font-mono">&epsilon; = 0.20</span>
+									<span class="text-2xl font-bold tracking-tight text-white font-mono" id="ppoMetricTrustRegion">&mdash;</span>
 								</div>
 							</div>
 						</div>
@@ -503,7 +503,7 @@
 										</svg>
 										<h4 class="text-xs font-semibold text-white uppercase tracking-wider mb-0">Trained WAF Profiles</h4>
 									</div>
-									<span class="text-[11px] font-mono text-[#8c8d9c]">10 Profiles &bull; 1.5k steps each</span>
+									<span class="text-[11px] font-mono text-[#8c8d9c]" id="ppoMetricProfilesSubtitle">&mdash;</span>
 								</div>
 
 								<!-- Profile Grid -->
@@ -514,9 +514,9 @@
 								<!-- Selected Profile Status Line -->
 								<div class="bg-[#12131a] border border-white/[0.06] rounded-xl px-3 py-2.5 flex items-center justify-between text-xs text-slate-300">
 									<span class="text-xs">
-										Selected: <strong class="text-white font-mono" id="ppoSelectedWafName">ModSecurity</strong>
+										Selected: <strong class="text-white font-mono" id="ppoSelectedWafName">&mdash;</strong>
 									</span>
-									<span class="font-mono text-cyber-accent text-xs" id="ppoSelectedWafStats">Accuracy: 78.4%</span>
+									<span class="font-mono text-cyber-accent text-xs" id="ppoSelectedWafStats">Accuracy: &mdash;</span>
 								</div>
 							</div>
 
@@ -534,14 +534,14 @@
 
 								<!-- Action Distribution Bars -->
 								<div class="space-y-3" id="ppoMutationActionsBars">
-									<div class="p-3 bg-[#12131a] border border-white/[0.06] rounded-xl text-center text-xs text-slate-400">Calculating weights...</div>
+									<div class="p-3 bg-[#12131a] border border-white/[0.06] rounded-xl text-center text-xs text-slate-500">Select a WAF profile to view mutation policy</div>
 								</div>
 
 								<!-- Policy Telemetry Footer -->
 								<div class="bg-[#12131a] border border-white/[0.06] rounded-xl px-3 py-2.5 mt-4 flex items-center justify-between text-[11px] text-[#8c8d9c]">
-									<span>Bypass Reward: <strong class="text-emerald-400 font-mono">+1.15</strong></span>
-									<span>Blocked Penalty: <strong class="text-rose-400 font-mono">-0.75</strong></span>
-									<span>Bloat Penalty: <strong class="text-amber-400 font-mono">-0.40</strong></span>
+									<span>Bypass Reward: <strong class="text-emerald-400 font-mono" id="ppoTelemetryReward">&mdash;</strong></span>
+									<span>Blocked Penalty: <strong class="text-rose-400 font-mono" id="ppoTelemetryPenalty">&mdash;</strong></span>
+									<span>Bloat Penalty: <strong class="text-amber-400 font-mono" id="ppoTelemetryBloat">&mdash;</strong></span>
 								</div>
 							</div>
 						</div>

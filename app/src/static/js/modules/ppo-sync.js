@@ -285,13 +285,15 @@ function computeProfileMetrics(prof) {
 	};
 }
 
-let activeSelectedWaf = 'ModSecurity';
+let activeSelectedWaf = null;
 let cachedWeightsData = null;
 
 async function refreshPPODashboardWidget() {
 	const totalUpdatesEl = document.getElementById('ppoMetricTotalUpdates');
 	const accuracyEl = document.getElementById('ppoMetricAccuracy');
-	const accuracyBar = document.getElementById('ppoAccuracyBar');
+	const actionCountEl = document.getElementById('ppoMetricActionCount');
+	const trustRegionEl = document.getElementById('ppoMetricTrustRegion');
+	const profilesSubtitleEl = document.getElementById('ppoMetricProfilesSubtitle');
 	const profilesContainer = document.getElementById('ppoWafProfilesList');
 
 	if (!totalUpdatesEl || !profilesContainer) return;
@@ -310,7 +312,11 @@ async function refreshPPODashboardWidget() {
 			0
 		);
 
-		totalUpdatesEl.textContent = totalUpdates.toLocaleString();
+		totalUpdatesEl.textContent = totalUpdates > 0 ? totalUpdates.toLocaleString() : '—';
+
+		if (actionCountEl) actionCountEl.textContent = (MUTATION_ACTION_LABELS.length).toString();
+		if (trustRegionEl) trustRegionEl.innerHTML = '&epsilon; = 0.20';
+		if (profilesSubtitleEl) profilesSubtitleEl.textContent = `${profileKeys.length} Profiles • 1.5k steps each`;
 
 		const versionEl = document.getElementById('ppoMetricVersion');
 		if (versionEl) versionEl.textContent = `v${data.version || 1}.0`;
@@ -324,13 +330,12 @@ async function refreshPPODashboardWidget() {
 			(dynamicAccuracies.reduce((a, b) => a + b, 0) / Math.max(dynamicAccuracies.length, 1)) * 10
 		) / 10;
 
-		if (accuracyEl) accuracyEl.textContent = `${avgAccuracy}%`;
-		if (accuracyBar) accuracyBar.style.width = `${avgAccuracy}%`;
+		if (accuracyEl) accuracyEl.textContent = avgAccuracy > 0 ? `${avgAccuracy}%` : '—';
 
 		// Render WAF profile selection cards with dynamic live stats
 		let profilesHtml = '';
 		for (const key of profileKeys) {
-			const isSelected = key === activeSelectedWaf;
+			const isSelected = !!activeSelectedWaf && key === activeSelectedWaf;
 			const p = profiles[key];
 			const count = p?.updateCount || p?.totalUpdates || 0;
 			const dyn = computeProfileMetrics(p);
@@ -355,7 +360,7 @@ async function refreshPPODashboardWidget() {
 		}
 		profilesContainer.innerHTML = profilesHtml;
 
-		// Render mutation policy distribution and accuracy for selected profile
+		// Render mutation policy distribution and accuracy for selected profile (or empty state if none selected)
 		renderSelectedProfilePolicy(activeSelectedWaf);
 	} catch (e) {
 		console.error('[PPO Widget] Failed to refresh:', e);
@@ -371,10 +376,30 @@ function renderSelectedProfilePolicy(wafName) {
 	const barsContainer = document.getElementById('ppoMutationActionsBars');
 	const selectedWafTitle = document.getElementById('ppoSelectedWafName');
 	const selectedWafStats = document.getElementById('ppoSelectedWafStats');
+	const rewardEl = document.getElementById('ppoTelemetryReward');
+	const penaltyEl = document.getElementById('ppoTelemetryPenalty');
+	const bloatEl = document.getElementById('ppoTelemetryBloat');
 
 	if (!barsContainer) return;
 
+	if (!wafName) {
+		if (selectedWafTitle) selectedWafTitle.textContent = '—';
+		if (selectedWafStats) selectedWafStats.textContent = 'Accuracy: —';
+		if (rewardEl) rewardEl.textContent = '—';
+		if (penaltyEl) penaltyEl.textContent = '—';
+		if (bloatEl) bloatEl.textContent = '—';
+		barsContainer.innerHTML = `
+			<div class="p-3 bg-[#12131a] border border-white/[0.06] rounded-xl text-center text-xs text-slate-500">
+				Select a WAF profile to view mutation policy
+			</div>
+		`;
+		return;
+	}
+
 	if (selectedWafTitle) selectedWafTitle.textContent = wafName;
+	if (rewardEl) rewardEl.textContent = '+1.15';
+	if (penaltyEl) penaltyEl.textContent = '-0.75';
+	if (bloatEl) bloatEl.textContent = '-0.40';
 
 	const prof = cachedWeightsData?.profiles?.[wafName] || cachedWeightsData?.profiles?.['default'];
 	const dyn = computeProfileMetrics(prof);
