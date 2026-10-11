@@ -428,8 +428,8 @@
 							</div>
 						</div>
 
-						<!-- PPO Model Intelligence: Separate KPI Blocks (Matching Top 5 Metric Cards Style) -->
-						<div class="grid grid-cols-2 md:grid-cols-5 gap-3.5 mb-4">
+						<!-- PPO Model Intelligence: Separate KPI Blocks (Matching Top Metric Cards Style) -->
+						<div class="grid grid-cols-2 md:grid-cols-4 gap-3.5 mb-4">
 							<!-- Block 1: Model Accuracy -->
 							<div class="bg-cyber-card border border-white/[0.07] rounded-2xl p-4 flex flex-col justify-between">
 								<div class="flex items-center justify-between mb-2">
@@ -490,25 +490,10 @@
 									<span class="text-2xl font-bold tracking-tight text-white font-mono">&epsilon; = 0.20</span>
 								</div>
 							</div>
-
-							<!-- Block 5: Learning Engine -->
-							<div class="bg-cyber-card border border-white/[0.07] rounded-2xl p-4 flex flex-col justify-between">
-								<div class="flex items-center justify-between mb-2">
-									<div class="flex items-center gap-2">
-										<svg class="w-4 h-4 text-cyber-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-											<path d="M13 10V3L4 14h7v7l9-11h-7z"/>
-										</svg>
-										<span class="text-xs font-medium text-[#8c8d9c]">Learning Engine</span>
-									</div>
-								</div>
-								<div class="flex items-baseline mt-1">
-									<span class="text-2xl font-bold tracking-tight text-white">Active</span>
-								</div>
-							</div>
 						</div>
 
 						<!-- Two Main Blocks: WAF Profiles + Mutation Strategy -->
-						<div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+						<div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
 							<!-- Block A: Trained WAF Profiles -->
 							<div class="bg-cyber-card border border-white/[0.07] rounded-2xl p-5 flex flex-col justify-between">
 								<div class="flex items-center justify-between mb-4">
@@ -559,29 +544,6 @@
 									<span>Blocked Penalty: <strong class="text-rose-400 font-mono">-0.75</strong></span>
 									<span>Bloat Penalty: <strong class="text-amber-400 font-mono">-0.40</strong></span>
 								</div>
-							</div>
-						</div>
-
-						<!-- Action Bar Block -->
-						<div class="bg-cyber-card border border-white/[0.07] rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3 mb-6">
-							<div class="flex items-center gap-3 text-xs text-[#8c8d9c]">
-								<svg class="w-4 h-4 text-cyber-accent shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-									<path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-								</svg>
-								<span>Tests sent to <code class="text-cyber-accent font-mono">http://localhost:8080</code> with <strong>Adaptive PPO</strong> checked dynamically refine weights online.</span>
-							</div>
-							<div class="flex items-center gap-2">
-								<button type="button" onclick="refreshPPODashboardWidget()" class="px-3 py-1.5 bg-[#12131a] hover:bg-[#1c1d27] border border-white/[0.08] hover:border-white/20 text-slate-200 hover:text-white rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5">
-									<svg class="w-3.5 h-3.5 text-cyber-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-									<span>Sync Metrics</span>
-								</button>
-								<button type="button" onclick="showPPOModal()" class="px-3 py-1.5 bg-[#12131a] hover:bg-[#1c1d27] border border-white/[0.08] hover:border-white/20 text-slate-200 hover:text-white rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5">
-									<svg class="w-3.5 h-3.5 text-cyber-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-									<span>Manage Weights</span>
-								</button>
-								<button type="button" onclick="copyPPOCliCommand()" class="px-3 py-1.5 bg-[#12131a] hover:bg-[#1c1d27] border border-white/[0.08] text-slate-300 hover:text-white rounded-xl text-xs font-mono transition-all flex items-center gap-1.5">
-									<span>$ npm run ppo:save</span>
-								</button>
 							</div>
 						</div>
 					</div>
