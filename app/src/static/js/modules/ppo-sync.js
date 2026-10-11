@@ -60,13 +60,15 @@ async function refreshPPOModalUI() {
 
 	const profiles = ppoModalData.profiles || {};
 	const profileKeys = Object.keys(profiles);
-	const totalUpdates = profileKeys.reduce((sum, key) => sum + (profiles[key]?.totalUpdates || 0), 0);
+	const totalUpdates = typeof ppoModalData.totalUpdates === 'number'
+		? ppoModalData.totalUpdates
+		: profileKeys.reduce((sum, key) => sum + (profiles[key]?.updateCount || profiles[key]?.totalUpdates || 0), 0);
 	const updatedAt = ppoModalData.updatedAt ? new Date(ppoModalData.updatedAt).toLocaleString() : 'Baseline';
 
 	let profilesListHtml = '';
 	for (const key of profileKeys) {
 		const prof = profiles[key];
-		const updates = prof.totalUpdates || 0;
+		const updates = prof.updateCount || prof.totalUpdates || 0;
 		const actionRows = prof.actorWeights?.length || 0;
 		profilesListHtml += `
 			<div class="p-2.5 bg-cyber-elevated/40 hover:bg-cyber-elevated/70 border border-white/[0.06] hover:border-white/[0.12] rounded-xl flex items-center justify-between transition-colors">
@@ -211,9 +213,13 @@ async function resetPPOWeights() {
 		});
 		if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
+		// Clear cached data so the UI doesn't use stale in-memory data
+		cachedWeightsData = null;
+
 		await refreshPPOModalUI();
+		await refreshPPODashboardWidget(true);
 		if (typeof showAlert === 'function') {
-			showAlert('PPO model weights have been reset to baseline defaults.', 'Reset Complete', 'success');
+			showAlert('PPO model weights have been reset to baseline defaults (0 steps).', 'Reset Complete', 'success');
 		}
 	} catch (err) {
 		if (typeof showAlert === 'function') {
@@ -272,12 +278,12 @@ function computeProfileMetrics(prof) {
 	const updates = prof.updateCount || prof.totalUpdates || 0;
 	const experienceScale = Math.min(1.0, updates / 1500);
 
-	// Real dynamic accuracy (55% baseline + up to 28% certainty + up to 14% experience)
-	const accuracy = Math.round((55.0 + (certainty * 28.0) + (experienceScale * 14.0)) * 10) / 10;
+	// Real dynamic accuracy (50% baseline + up to 28% certainty + up to 14% experience)
+	const accuracy = Math.round((50.0 + (certainty * 28.0) + (experienceScale * 14.0)) * 10) / 10;
 	
 	// Dynamic estimated bypass rate based on best learned mutation strength
 	const maxProb = Math.max(...probs);
-	const bypassRate = Math.round((20.0 + (maxProb * 120.0) + (experienceScale * 10.0)));
+	const bypassRate = Math.round((15.0 + (maxProb * 120.0) + (experienceScale * 10.0)));
 
 	return {
 		accuracy: Math.min(98.5, Math.max(50.0, accuracy)),
@@ -310,16 +316,24 @@ async function refreshPPODashboardWidget(forceFetch = false) {
 		const profileKeys = Object.keys(profiles);
 
 		// Calculate total updates dynamically from live weights data
-		const totalUpdates = data.totalUpdates || profileKeys.reduce(
-			(sum, key) => sum + (profiles[key]?.updateCount || profiles[key]?.totalUpdates || 0),
-			0
-		);
+		const totalUpdates = typeof data.totalUpdates === 'number'
+			? data.totalUpdates
+			: profileKeys.reduce(
+				(sum, key) => sum + (profiles[key]?.updateCount || profiles[key]?.totalUpdates || 0),
+				0
+			);
 
-		totalUpdatesEl.textContent = totalUpdates > 0 ? totalUpdates.toLocaleString() : '—';
+		totalUpdatesEl.textContent = totalUpdates.toLocaleString();
 
 		if (actionCountEl) actionCountEl.textContent = (MUTATION_ACTION_LABELS.length).toString();
 		if (trustRegionEl) trustRegionEl.innerHTML = '&epsilon; = 0.20';
-		if (profilesSubtitleEl) profilesSubtitleEl.textContent = `${profileKeys.length} Profiles • 1.5k steps each`;
+		
+		const maxSteps = Math.max(...profileKeys.map((k) => profiles[k]?.updateCount || profiles[k]?.totalUpdates || 0), 0);
+		if (profilesSubtitleEl) {
+			profilesSubtitleEl.textContent = maxSteps > 0
+				? `${profileKeys.length} Profiles • ${maxSteps.toLocaleString()} steps each`
+				: `${profileKeys.length} Profiles • Baseline (0 steps)`;
+		}
 
 		const versionEl = document.getElementById('ppoMetricVersion');
 		if (versionEl) versionEl.textContent = `v${data.version || 1}.0`;

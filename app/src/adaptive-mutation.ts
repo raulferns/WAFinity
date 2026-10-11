@@ -300,8 +300,40 @@ class PPOWeightsManager {
 		this.data.updatedAt = new Date().toISOString();
 	}
 
+	createBaselineWeights(): PPOWeightsFile {
+		const knownWAFs = [
+			'Cloudflare',
+			'AWS WAF',
+			'ModSecurity',
+			'F5 BIG-IP',
+			'Imperva',
+			'Akamai',
+			'Azure Front Door',
+			'Fastly',
+			'FortiWeb',
+			'default',
+		];
+		const profiles: Record<string, PPOModelProfile> = {};
+		for (const waf of knownWAFs) {
+			profiles[waf] = {
+				updateCount: 0,
+				lastTrained: new Date().toISOString(),
+				actorWeights: MUTATION_ACTIONS.map((_, actionIndex) =>
+					Array.from({ length: FEATURE_SIZE }, (_, featureIndex) => (actionIndex === 0 && featureIndex === 0 ? 0.08 : 0)),
+				),
+				criticWeights: Array.from({ length: FEATURE_SIZE }, () => 0),
+			};
+		}
+		return {
+			version: 1,
+			updatedAt: new Date().toISOString(),
+			totalUpdates: 0,
+			profiles,
+		};
+	}
+
 	resetToDefaults(): void {
-		this.data = this.cloneWeights(initialPPOWeights as PPOWeightsFile);
+		this.data = this.createBaselineWeights();
 	}
 }
 
