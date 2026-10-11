@@ -11,7 +11,10 @@
 		"test": "vitest",
 		"cf-typegen": "wrangler types",
 		"ppo:save": "node scripts/save-ppo-weights.js",
-		"ppo:train": "node scripts/train-all-wafs.js"
+		"ppo:train": "node scripts/train-all-wafs.js",
+		"modsec:start": "node scripts/run-modsecurity.js start",
+		"modsec:stop": "node scripts/run-modsecurity.js stop",
+		"modsec:logs": "node scripts/run-modsecurity.js logs"
 	},
 	"devDependencies": {
 		"@cloudflare/vitest-pool-workers": "^0.8.19",
