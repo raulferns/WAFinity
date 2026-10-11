@@ -258,23 +258,30 @@ function renderResultRow(r, falsePositiveMode = false) {
 	const isError = statusStr === 'ERR' || statusStr === 'error' || statusStr === 'Error';
 	const codeNum = isError ? NaN : parseInt(statusStr, 10);
 	let statusBg = 'bg-slate-500/10 border border-slate-500/25 text-slate-300';
+	let payloadClass = 'payload-box-slate';
 	let statusDisplay = r.status;
 	let statusTooltip = '';
 
 	if (isError || isNaN(codeNum)) {
 		statusBg = 'bg-red-500/10 border border-red-500/25 text-red-500';
+		payloadClass = 'payload-box-red';
 	} else if (falsePositiveMode) {
 		if (codeNum >= 200 && codeNum < 300) {
 			statusBg = 'bg-emerald-500/10 border border-emerald-500/25 text-emerald-400';
+			payloadClass = 'payload-box-green';
 		} else if (codeNum === 403) {
 			statusBg = 'bg-red-500/10 border border-red-500/25 text-red-500';
+			payloadClass = 'payload-box-red';
 		} else if (codeNum >= 300 && codeNum < 400) {
 			statusBg = 'bg-amber-500/10 border border-amber-500/25 text-amber-400';
+			payloadClass = 'payload-box-orange';
 			statusTooltip = `title="Redirect (${codeNum}): The server redirected this request."`;
 		} else if (codeNum >= 400 && codeNum < 500) {
 			statusBg = 'bg-amber-500/10 border border-amber-500/25 text-amber-400';
+			payloadClass = 'payload-box-orange';
 		} else if (codeNum >= 500 && codeNum < 600) {
 			statusBg = 'bg-red-500/10 border border-red-500/25 text-red-500';
+			payloadClass = 'payload-box-red';
 		}
 	} else {
 		// Normal Security Test:
@@ -283,10 +290,13 @@ function renderResultRow(r, falsePositiveMode = false) {
 		// 3xx = Redirect (AMBER)
 		if (codeNum >= 400 && codeNum < 500) {
 			statusBg = 'bg-emerald-500/10 border border-emerald-500/25 text-emerald-400';
+			payloadClass = 'payload-box-green';
 		} else if ((codeNum >= 200 && codeNum < 300) || (codeNum >= 500 && codeNum < 600)) {
 			statusBg = 'bg-red-500/10 border border-red-500/25 text-red-500';
+			payloadClass = 'payload-box-red';
 		} else if (codeNum >= 300 && codeNum < 400) {
 			statusBg = 'bg-amber-500/10 border border-amber-500/25 text-amber-400';
+			payloadClass = 'payload-box-orange';
 			statusTooltip = `title="Redirect (${codeNum}): The server redirected this request."`;
 		}
 	}
@@ -316,7 +326,7 @@ function renderResultRow(r, falsePositiveMode = false) {
 			</td>
 			<td class="px-4 py-2.5 text-center whitespace-nowrap">${timeHtml}</td>
 			<td class="px-4 py-2.5">
-				<code class="text-xs font-mono text-slate-300 bg-[#0b0c10] border border-white/[0.06] px-2.5 py-1 rounded-md break-all select-all block leading-relaxed">${escapeHtml(r.payload)}</code>
+				<code class="text-xs font-mono ${payloadClass} px-2.5 py-1 rounded-md break-all select-all block leading-relaxed">${escapeHtml(r.payload)}</code>
 				${adaptiveHtml}
 			</td>
 		</tr>`;
