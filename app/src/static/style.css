@@ -1,0 +1,1800 @@
+/* WAF-CHECKER.COM - Modern Refined Design System */
+/* Main styling is handled by Tailwind CSS */
+
+:root {
+	--cyber-bg: #0b0c10;
+	--cyber-bg-secondary: #111218;
+	--cyber-card: #15161e;
+	--cyber-elevated: #1c1d27;
+	--cyber-accent: #f05627;
+	--cyber-accent-hover: #ff6838;
+	--cyber-purple: #8b5cf6;
+	--cyber-success: #10b981;
+	--cyber-danger: #ef4444;
+	--cyber-warning: #f59e0b;
+	--cyber-border: rgba(255, 255, 255, 0.08);
+	--cyber-border-subtle: rgba(255, 255, 255, 0.08);
+	--bs-border-color: rgba(255, 255, 255, 0.08);
+	--bs-border-color-translucent: rgba(255, 255, 255, 0.08);
+	--cyber-border-accent: rgba(240, 86, 39, 0.35);
+	--cyber-surface-glow: none;
+
+	/* Spring physics curves from .agents standard */
+	--spring-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+	--spring-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+	--spring-press: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+
+/* ========================================================
+   SUBTLE BORDER SYSTEM (Matching HTTP Methods GET border)
+   Eliminates ugly Bootstrap/default #dee2e6 grey borders everywhere except header
+   ======================================================== */
+:root,
+body,
+[data-theme="dark"] {
+	--bs-border-color: rgba(255, 255, 255, 0.08) !important;
+	--bs-border-color-translucent: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Neutralize Bootstrap's aggressive !important border rules on all non-header elements */
+body *:not(header):not(header *) {
+	--bs-border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Default subtle border for all pages (matches HTTP methods GET border) */
+.border,
+.border-top,
+.border-bottom,
+.border-start,
+.border-end {
+	border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Accent status borders (preserve colors with subtle opacity over Bootstrap) */
+.border-emerald-500\/30, .border-emerald-500\/20, [class*="border-emerald"] { border-color: rgba(16, 185, 129, 0.3) !important; }
+.border-cyan-500\/30, .border-cyan-500\/20, [class*="border-cyan"] { border-color: rgba(6, 182, 212, 0.3) !important; }
+.border-purple-500\/30, .border-purple-500\/20, [class*="border-purple"] { border-color: rgba(168, 85, 247, 0.3) !important; }
+.border-amber-500\/30, .border-amber-500\/20, [class*="border-amber"] { border-color: rgba(245, 158, 11, 0.3) !important; }
+.border-red-500\/30, .border-red-500\/20, [class*="border-red"] { border-color: rgba(239, 68, 68, 0.3) !important; }
+.border-orange-500\/30, .border-orange-500\/20, [class*="border-orange"] { border-color: rgba(249, 115, 22, 0.3) !important; }
+.border-blue-500\/30, .border-blue-500\/20, [class*="border-blue"] { border-color: rgba(59, 130, 246, 0.3) !important; }
+.border-pink-500\/30, .border-pink-500\/20, [class*="border-pink"] { border-color: rgba(236, 72, 153, 0.3) !important; }
+.border-teal-500\/30, .border-teal-500\/20, [class*="border-teal"] { border-color: rgba(20, 184, 166, 0.3) !important; }
+.border-cyber-accent, [class*="border-cyber-accent"] { border-color: rgba(240, 86, 39, 0.35) !important; }
+
+/* Subtle white border opacity classes */
+.border-white\/\[0\.04\] { border-color: rgba(255, 255, 255, 0.04) !important; }
+.border-white\/\[0\.05\] { border-color: rgba(255, 255, 255, 0.05) !important; }
+.border-white\/\[0\.06\] { border-color: rgba(255, 255, 255, 0.06) !important; }
+.border-white\/\[0\.07\] { border-color: rgba(255, 255, 255, 0.07) !important; }
+.border-white\/\[0\.08\] { border-color: rgba(255, 255, 255, 0.08) !important; }
+.border-white\/\[0\.1\] { border-color: rgba(255, 255, 255, 0.1) !important; }
+.border-white\/\[0\.12\] { border-color: rgba(255, 255, 255, 0.12) !important; }
+.border-white\/\[0\.15\] { border-color: rgba(255, 255, 255, 0.15) !important; }
+.border-white\/\[0\.18\] { border-color: rgba(255, 255, 255, 0.18) !important; }
+.border-white\/10 { border-color: rgba(255, 255, 255, 0.1) !important; }
+.border-white\/20 { border-color: rgba(255, 255, 255, 0.2) !important; }
+
+/* Background gradient matching the reference image's warm cosmic nebula glow */
+body {
+	background-color: #0b0c10 !important;
+	background-image: 
+		radial-gradient(ellipse 750px 480px at 18% -5%, rgba(240, 86, 39, 0.22) 0%, rgba(180, 40, 20, 0.08) 45%, transparent 75%),
+		radial-gradient(ellipse 600px 380px at 85% 105%, rgba(240, 86, 39, 0.12) 0%, transparent 70%) !important;
+	background-attachment: fixed !important;
+}
+
+body::before {
+	display: none !important;
+}
+
+/* When API docs panel is open: hide main header and disclaimer so only the panel is visible */
+body.api-panel-open #disclaimerBanner,
+body.api-panel-open > header {
+	visibility: hidden !important;
+	pointer-events: none !important;
+}
+
+/* Force dark backgrounds on Bootstrap modals (matte, NO GLOW) */
+.modal-content {
+	background-color: #15161e !important;
+	border: 1px solid rgba(255, 255, 255, 0.09) !important;
+	box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8) !important;
+	border-radius: 1.25rem !important;
+}
+.modal-header,
+.modal-footer {
+	background-color: #1c1d27 !important;
+	border-color: rgba(255, 255, 255, 0.07) !important;
+}
+
+/* Advanced panel & Attack Categories: scrollable */
+#panelAdvanced,
+#categoryCheckboxes {
+	padding-right: 14px !important;
+	scrollbar-width: thin;
+	scrollbar-color: rgba(240, 86, 39, 0.35) transparent;
+}
+
+#panelAdvanced,
+#categoryCheckboxes {
+	overflow-y: auto;
+}
+
+#panelAdvanced {
+	max-height: 320px;
+}
+
+#categoryCheckboxes {
+	max-height: 288px;
+}
+
+#panelAdvanced::-webkit-scrollbar,
+#categoryCheckboxes::-webkit-scrollbar {
+	width: 5px !important;
+}
+
+#panelAdvanced::-webkit-scrollbar-button,
+#categoryCheckboxes::-webkit-scrollbar-button {
+	display: none !important;
+	width: 0 !important;
+	height: 0 !important;
+}
+
+#panelAdvanced::-webkit-scrollbar-track,
+#categoryCheckboxes::-webkit-scrollbar-track {
+	background: rgba(0, 0, 0, 0.15) !important;
+}
+
+#panelAdvanced::-webkit-scrollbar-thumb,
+#categoryCheckboxes::-webkit-scrollbar-thumb {
+	background: rgba(240, 86, 39, 0.45) !important;
+	border-radius: 3px !important;
+}
+
+#panelAdvanced::-webkit-scrollbar-thumb:hover,
+#categoryCheckboxes::-webkit-scrollbar-thumb:hover {
+	background: rgba(240, 86, 39, 0.55);
+}
+
+/* Advanced Options Popup - Spring entrance */
+#advancedPopup {
+	animation: springPopupIn 0.24s var(--spring-bounce);
+}
+
+@keyframes springPopupIn {
+	from {
+		opacity: 0;
+		transform: translateY(-8px) scale(0.96);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
+}
+
+/* Custom Modal Animation - Spring physics pop-in */
+.animate-modal-in {
+	animation: modalSpringIn 0.28s var(--spring-smooth);
+}
+
+@keyframes modalSpringIn {
+	0% {
+		opacity: 0;
+		transform: scale(0.94) translateY(14px);
+	}
+	60% {
+		opacity: 1;
+		transform: scale(1.01) translateY(-2px);
+	}
+	100% {
+		opacity: 1;
+		transform: scale(1) translateY(0);
+	}
+}
+
+/* Progress Bar Shimmer Animation */
+.animate-shimmer {
+	animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+	0% {
+		transform: translateX(-100%);
+	}
+	100% {
+		transform: translateX(100%);
+	}
+}
+
+/* Border width for progress spinner */
+.border-3 {
+	border-width: 3px;
+}
+
+/* =============================================
+   Unified Cyber Scanner Loader (Lottie Animation)
+   ============================================= */
+.cyber-loader {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	overflow: hidden;
+}
+
+.cyber-loader svg {
+	width: 100% !important;
+	height: 100% !important;
+	display: block;
+}
+
+/* Size variants */
+.cyber-loader--sm { width: 22px; height: 22px; }
+.cyber-loader--md { width: 44px; height: 44px; }
+.cyber-loader--lg { width: 72px; height: 72px; }
+
+/* Inline mode in buttons and chips */
+.cyber-loader-inline {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	vertical-align: middle;
+}
+.cyber-loader-inline .cyber-loader {
+	width: 18px;
+	height: 18px;
+}
+.cyber-loader-inline .cyber-loader-text {
+	font-weight: 500;
+}
+
+/* Category checkboxes generated by JS */
+#categoryCheckboxes .form-check {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	background: #181923;
+	border: 1px solid rgba(255, 255, 255, 0.07);
+	box-shadow: none !important;
+	border-radius: 0.625rem;
+	padding: 0.42rem 0.6rem;
+	cursor: pointer;
+	transition: transform 0.18s var(--spring-bounce), background-color 0.18s ease, border-color 0.18s ease;
+	font-size: 0.72rem;
+}
+
+#categoryCheckboxes .form-check:hover {
+	border-color: rgba(240, 86, 39, 0.5);
+	background: rgba(240, 86, 39, 0.08);
+	transform: translateX(2px);
+	box-shadow: none !important;
+}
+
+#categoryCheckboxes .form-check:active {
+	transform: scale(0.98);
+	transition-duration: 0.08s;
+}
+
+#categoryCheckboxes .form-check-input {
+	-webkit-appearance: auto !important;
+	-moz-appearance: auto !important;
+	appearance: auto !important;
+	width: 0.875rem !important;
+	height: 0.875rem !important;
+	accent-color: #f05627 !important;
+	margin: 0 !important;
+	flex-shrink: 0 !important;
+	background: transparent !important;
+	background-image: none !important;
+	border: none !important;
+	box-shadow: none !important;
+	cursor: pointer;
+	transition: transform 0.2s var(--spring-bounce);
+}
+
+#categoryCheckboxes .form-check-input:checked {
+	background-color: transparent !important;
+	background-image: none !important;
+	border-color: transparent !important;
+	accent-color: #f05627 !important;
+	transform: scale(1.08);
+}
+
+#categoryCheckboxes .form-check-input:focus {
+	border-color: transparent !important;
+	box-shadow: none !important;
+	outline: none !important;
+}
+
+#categoryCheckboxes .form-check-label {
+	color: #d1d2de;
+	cursor: pointer;
+	line-height: 1.2;
+	font-size: 0.72rem;
+	font-weight: 500;
+}
+
+.category-label-danger {
+	color: #ef4444 !important;
+}
+
+/* Results table styling (matte, matching Alert Queue table in reference) */
+#results table {
+	width: 100%;
+	border-collapse: separate;
+	border-spacing: 0;
+	border-radius: 1rem;
+	overflow: hidden;
+	background: var(--cyber-card);
+	border: 1px solid var(--cyber-border);
+	box-shadow: none !important;
+	font-size: 0.82rem;
+}
+
+#results th {
+	background: #171822;
+	color: #7c7d8d;
+	font-weight: 600;
+	text-align: center;
+	padding: 0.85rem 0.75rem;
+	font-size: 0.68rem;
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+#results td {
+	padding: 0.65rem 0.75rem;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+	color: #f1f1f8;
+}
+
+#results tr:nth-child(even) {
+	background: #12131a;
+}
+
+#results tr:nth-child(odd) {
+	background: var(--cyber-card);
+}
+
+#results table tbody tr {
+	transition: transform 0.18s var(--spring-smooth), background-color 0.18s ease;
+}
+
+#results table tbody tr:hover {
+	background: rgba(255, 255, 255, 0.03) !important;
+	transform: translateX(2px);
+}
+
+#results table code,
+#results .test-table code,
+#results .test-payload-code {
+	font-family: 'JetBrains Mono', monospace;
+	font-size: 0.75rem;
+	padding: 0.15rem 0.4rem;
+	background: rgba(240, 86, 39, 0.08);
+	border: 1px solid rgba(240, 86, 39, 0.2);
+	border-radius: 0.35rem;
+	word-break: break-all;
+	color: #f05627;
+}
+
+.full-recon-container code {
+	background: transparent;
+	border: none;
+	padding: 0;
+	border-radius: 0;
+}
+
+.payload-green {
+	color: #10b981 !important;
+}
+
+/* Status colors - Matte optical pill badges (NO GLOW) */
+.status-redirect {
+	background: rgba(139, 92, 246, 0.12) !important;
+	color: #a78bfa !important;
+	border: 1px solid rgba(139, 92, 246, 0.25) !important;
+	font-weight: 600;
+	box-shadow: none !important;
+}
+
+.status-green {
+	background: rgba(16, 185, 129, 0.12) !important;
+	color: #34d399 !important;
+	border: 1px solid rgba(16, 185, 129, 0.25) !important;
+	font-weight: 600;
+	box-shadow: none !important;
+}
+
+.status-red {
+	background: rgba(239, 68, 68, 0.12) !important;
+	color: #f87171 !important;
+	border: 1px solid rgba(239, 68, 68, 0.25) !important;
+	font-weight: 600;
+	box-shadow: none !important;
+}
+
+.status-orange {
+	background: rgba(240, 86, 39, 0.12) !important;
+	color: #ff7a45 !important;
+	border: 1px solid rgba(240, 86, 39, 0.25) !important;
+	font-weight: 600;
+	box-shadow: none !important;
+}
+
+.status-gray {
+	background: rgba(100, 116, 139, 0.12) !important;
+	color: #cbd5e1 !important;
+	border: 1px solid rgba(100, 116, 139, 0.25) !important;
+	box-shadow: none !important;
+}
+
+.status-redirect, .status-green, .status-red, .status-orange, .status-gray, .status-code {
+	transition: transform 0.18s var(--spring-bounce);
+	display: inline-block;
+}
+
+.status-redirect:hover, .status-green:hover, .status-red:hover, .status-orange:hover, .status-gray:hover {
+	transform: scale(1.05);
+}
+
+#checkBtn {
+	position: relative;
+	overflow: hidden;
+	background: #f05627 !important;
+	color: #ffffff !important;
+	border: 1px solid rgba(255, 255, 255, 0.18) !important;
+	box-shadow: none !important; /* NO GLOW */
+	transition: transform 0.18s var(--spring-bounce), background-color 0.18s ease, border-color 0.18s ease !important;
+}
+#checkBtn:hover {
+	background: #ff6838 !important;
+	border-color: rgba(255, 255, 255, 0.32) !important;
+	transform: translateY(-1.5px) !important;
+	box-shadow: none !important; /* NO GLOW */
+}
+#checkBtn:active {
+	transform: scale(0.97) !important;
+	box-shadow: none !important;
+	transition-duration: 0.08s !important;
+}
+
+/* Tactile spring buttons & action buttons across all pages (JSON, HTML, etc.) */
+#secondaryBtns button,
+.tool-btn,
+button[onclick*="exportRecon"],
+button[onclick*="exportResults"],
+#exportControls button,
+#results .export-btn,
+.export-btn,
+.action-btn-subtle {
+	background: #181923 !important;
+	border: 1px solid rgba(255, 255, 255, 0.08) !important;
+	border-radius: 0.625rem !important; /* 10px subtle rounded - exactly matching HTTP methods GET border */
+	color: #d8d8e5 !important;
+	box-shadow: none !important; /* NO GLOW */
+	transition: transform 0.18s var(--spring-bounce), background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease !important;
+}
+
+#secondaryBtns button:hover,
+.tool-btn:hover,
+button[onclick*="exportRecon"]:hover,
+button[onclick*="exportResults"]:hover,
+#exportControls button:hover,
+#results .export-btn:hover,
+.export-btn:hover,
+.action-btn-subtle:hover {
+	background: #20212d !important;
+	border-color: rgba(255, 255, 255, 0.18) !important;
+	color: #ffffff !important;
+	transform: translateY(-1.5px) !important;
+	box-shadow: none !important;
+}
+
+#secondaryBtns button:active,
+.tool-btn:active,
+button[onclick*="exportRecon"]:active,
+button[onclick*="exportResults"]:active,
+#exportControls button:active,
+#results .export-btn:active,
+.export-btn:active,
+.action-btn-subtle:active {
+	transform: scale(0.97) !important;
+	box-shadow: none !important;
+	transition-duration: 0.08s !important;
+}
+
+/* Badges and metric pills across pages - subtle rounded corners */
+#results span.border,
+#results .badge,
+.score-badge,
+.status-pill {
+	border-radius: 0.5rem !important;
+}
+
+/* Header buttons spring (NO GLOW) */
+header button,
+header a {
+	box-shadow: none !important;
+	transition: transform 0.18s var(--spring-bounce), background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease !important;
+}
+header button:hover,
+header a:hover {
+	transform: translateY(-1.5px) !important;
+	box-shadow: none !important;
+}
+header button:active,
+header a:active {
+	transform: scale(0.96) !important;
+	box-shadow: none !important;
+	transition-duration: 0.08s !important;
+}
+
+/* Methods selector spring cards */
+.methods-grid label {
+	background: #181923 !important;
+	border: 1px solid rgba(255, 255, 255, 0.08) !important;
+	box-shadow: none !important; /* NO GLOW */
+	border-radius: 0.625rem !important;
+	transition: transform 0.18s var(--spring-bounce), border-color 0.18s ease, background-color 0.18s ease !important;
+}
+.methods-grid label:hover {
+	transform: translateY(-1.5px) !important;
+	border-color: rgba(240, 86, 39, 0.45) !important;
+	box-shadow: none !important;
+}
+.methods-grid label:active {
+	transform: scale(0.97) !important;
+	box-shadow: none !important;
+	transition-duration: 0.08s !important;
+}
+
+/* Cards & Surface (matte, NO GLOW) */
+.bg-cyber-card,
+.card {
+	background-color: var(--cyber-card) !important;
+	border: 1px solid var(--cyber-border) !important;
+	box-shadow: none !important; /* NO GLOW */
+	border-radius: 1.125rem !important; /* 18px */
+	transition: transform 0.2s var(--spring-smooth), border-color 0.2s ease;
+}
+.bg-cyber-card:hover {
+	border-color: rgba(255, 255, 255, 0.14) !important;
+	box-shadow: none !important;
+}
+
+/* Inputs with clean outline (NO GLOW) */
+input[type="url"],
+input[type="text"],
+textarea,
+select {
+	background: var(--cyber-elevated) !important;
+	border: 1px solid rgba(255, 255, 255, 0.08) !important;
+	box-shadow: none !important; /* NO GLOW */
+	border-radius: 0.625rem !important;
+	transition: border-color 0.2s ease, transform 0.2s ease;
+}
+input[type="url"]:focus,
+input[type="text"]:focus,
+textarea:focus,
+select:focus {
+	border-color: var(--cyber-accent) !important;
+	box-shadow: 0 0 0 1px var(--cyber-accent) !important; /* Clean 1px outline, NO diffuse glow */
+	outline: none !important;
+}
+
+/* Tabs spring transition */
+#tabTarget, #tabAdvanced {
+	transition: all 0.22s var(--spring-smooth);
+}
+#tabTarget:hover, #tabAdvanced:hover {
+	color: #f8fafc;
+}
+#tabTarget:active, #tabAdvanced:active {
+	transform: scale(0.98);
+}
+
+/* Summary bars */
+.status-bar {
+	height: 1.5rem;
+	min-width: 2px;
+	line-height: 1.5rem;
+	padding-left: 0.625rem;
+	display: inline-block;
+	border-radius: 0.25rem;
+	font-weight: 600;
+	font-size: 0.75rem;
+	color: #f1f5f9;
+}
+
+.status-bar-total {
+	width: 100%;
+	background: #1c2438;
+	color: #f1f5f9;
+	border: 1px solid rgba(148, 163, 184, 0.15);
+}
+
+.min-width-112 {
+	min-width: 6.875rem;
+}
+
+.min-width-112 label {
+	color: #f0f6fc;
+}
+
+.checkbox-align {
+	margin-right: 0.3rem;
+	vertical-align: middle;
+}
+
+/* Test mode indicators */
+.false-positive-indicator,
+.normal-test-indicator {
+	padding: 0.75rem 1rem;
+	margin: 0.75rem 0;
+	border-radius: 0.5rem;
+	border-left: 4px solid;
+}
+
+.false-positive-indicator {
+	background: rgba(59, 130, 246, 0.08);
+	border-color: #3b82f6;
+}
+
+.false-positive-indicator strong {
+	color: #93c5fd;
+}
+
+.false-positive-indicator small {
+	color: #cbd5e1;
+}
+
+.normal-test-indicator {
+	background: rgba(56, 189, 248, 0.08);
+	border-color: #38bdf8;
+}
+
+.normal-test-indicator strong {
+	color: #38bdf8;
+}
+
+.normal-test-indicator small {
+	color: #cbd5e1;
+}
+
+/* Help icon */
+.help-icon {
+	cursor: pointer;
+	margin-left: 0.5rem;
+	opacity: 0.7;
+	transition: opacity 0.2s ease;
+}
+
+.help-icon:hover {
+	opacity: 1;
+	color: #38bdf8;
+}
+
+.help-content {
+	margin-top: 0.5rem;
+	padding: 0.5rem;
+	background: #0f1523;
+	border-radius: 0.375rem;
+	border-left: 3px solid #38bdf8;
+	color: #cbd5e1;
+}
+
+/* Cards for JS-generated content (NO GLOW) */
+.card {
+	background: var(--cyber-card);
+	border: 1px solid var(--cyber-border);
+	box-shadow: none !important;
+	border-radius: 1.125rem;
+}
+
+.card-header {
+	background: var(--cyber-elevated);
+	border-bottom: 1px solid var(--cyber-border);
+	padding: 0.75rem 1rem;
+	color: #f1f5f9;
+}
+
+.card-body {
+	padding: 1rem;
+	color: #f1f5f9;
+}
+
+/* Alerts (NO GLOW) */
+.alert-info {
+	background: rgba(240, 86, 39, 0.08);
+	border: 1px solid rgba(240, 86, 39, 0.25);
+	box-shadow: none !important;
+	color: #f1f5f9;
+	border-radius: 0.75rem;
+	padding: 0.75rem 1rem;
+}
+
+.alert-success {
+	background: rgba(16, 185, 129, 0.08);
+	border: 1px solid rgba(16, 185, 129, 0.25);
+	box-shadow: none !important;
+	color: #f1f5f9;
+	border-radius: 0.75rem;
+	padding: 0.75rem 1rem;
+}
+
+.alert-warning {
+	background: rgba(245, 158, 11, 0.08);
+	border: 1px solid rgba(245, 158, 11, 0.25);
+	box-shadow: none !important;
+	color: #f1f5f9;
+	border-radius: 0.75rem;
+	padding: 0.75rem 1rem;
+}
+
+/* Badges */
+.badge {
+	font-family: 'Outfit', sans-serif;
+	font-weight: 600;
+	padding: 0.3em 0.6em;
+	border-radius: 0.375rem;
+	font-size: 0.7rem;
+	letter-spacing: 0.03em;
+}
+
+.badge.bg-success {
+	background: #10b981 !important;
+	color: #ffffff !important;
+}
+
+.badge.bg-danger {
+	background: #f43f5e !important;
+	color: #ffffff !important;
+}
+
+.badge.bg-warning {
+	background: #f59e0b !important;
+	color: #080b12 !important;
+}
+
+.badge.bg-info {
+	background: #38bdf8 !important;
+	color: #080b12 !important;
+}
+
+/* Progress bar */
+.progress {
+	background: var(--cyber-elevated);
+	border: 1px solid rgba(255, 255, 255, 0.06);
+	border-radius: 0.375rem;
+	height: 0.5rem;
+	overflow: hidden;
+}
+
+.progress-bar {
+	background: linear-gradient(90deg, #38bdf8 0%, #10b981 100%);
+	transition: width 0.35s var(--spring-smooth);
+}
+
+.progress-bar-animated {
+	background: linear-gradient(90deg, #38bdf8 0%, #10b981 50%, #38bdf8 100%);
+	background-size: 200% 100%;
+	animation: progress-animation 2s linear infinite;
+}
+
+@keyframes progress-animation {
+	0% { background-position: 200% 0; }
+	100% { background-position: -200% 0; }
+}
+
+/* Scrollbars - Unified burnt-orange matte theme */
+@supports not selector(::-webkit-scrollbar) {
+	*,
+	#results,
+	#results *,
+	.full-recon-container,
+	.full-recon-container * {
+		scrollbar-width: thin !important;
+		scrollbar-color: rgba(240, 86, 39, 0.45) transparent !important;
+	}
+}
+
+::-webkit-scrollbar,
+#results::-webkit-scrollbar,
+#results *::-webkit-scrollbar,
+.full-recon-container::-webkit-scrollbar,
+.full-recon-container *::-webkit-scrollbar {
+	width: 5px !important;
+	height: 5px !important;
+}
+
+::-webkit-scrollbar-track,
+#results::-webkit-scrollbar-track,
+#results *::-webkit-scrollbar-track,
+.full-recon-container::-webkit-scrollbar-track,
+.full-recon-container *::-webkit-scrollbar-track {
+	background: transparent !important;
+}
+
+::-webkit-scrollbar-thumb,
+#results::-webkit-scrollbar-thumb,
+#results *::-webkit-scrollbar-thumb,
+.full-recon-container::-webkit-scrollbar-thumb,
+.full-recon-container *::-webkit-scrollbar-thumb {
+	background: rgba(240, 86, 39, 0.35) !important;
+	border-radius: 3px !important;
+	transition: background 0.2s ease !important;
+}
+
+::-webkit-scrollbar-thumb:hover,
+#results::-webkit-scrollbar-thumb:hover,
+#results *::-webkit-scrollbar-thumb:hover,
+.full-recon-container::-webkit-scrollbar-thumb:hover,
+.full-recon-container *::-webkit-scrollbar-thumb:hover {
+	background: rgba(240, 86, 39, 0.55) !important;
+}
+
+/* Selection */
+::selection {
+	background: rgba(240, 86, 39, 0.35);
+	color: #ffffff;
+}
+
+/* Test Configuration Modal */
+#testConfigModal .modal-body {
+	overflow: hidden;
+}
+
+#testConfigModal .modal-body > div {
+	height: 100%;
+	min-height: 400px;
+}
+
+#configCategoryList {
+	min-height: 0;
+	scrollbar-width: thin;
+	scrollbar-color: rgba(240, 86, 39, 0.35) transparent;
+}
+
+#configCategoryList::-webkit-scrollbar {
+	width: 5px;
+}
+
+#configCategoryList::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+#configCategoryList::-webkit-scrollbar-thumb {
+	background: rgba(240, 86, 39, 0.35);
+	border-radius: 3px;
+}
+
+#configCategoryList::-webkit-scrollbar-thumb:hover {
+	background: rgba(240, 86, 39, 0.55);
+}
+
+#configAttackPayloads,
+#configFalsePayloads {
+	min-height: 0;
+	scrollbar-width: thin;
+	scrollbar-color: rgba(240, 86, 39, 0.35) transparent;
+}
+
+#configAttackPayloads::-webkit-scrollbar,
+#configFalsePayloads::-webkit-scrollbar {
+	width: 5px;
+}
+
+#configAttackPayloads::-webkit-scrollbar-track,
+#configFalsePayloads::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+#configAttackPayloads::-webkit-scrollbar-thumb,
+#configFalsePayloads::-webkit-scrollbar-thumb {
+	background: rgba(240, 86, 39, 0.35);
+	border-radius: 3px;
+}
+
+#configAttackPayloads::-webkit-scrollbar-thumb:hover,
+#configFalsePayloads::-webkit-scrollbar-thumb:hover {
+	background: rgba(240, 86, 39, 0.55);
+}
+
+/* =============================================
+   MOBILE DRAWER - Hamburger button
+   ============================================= */
+.mobile-menu-btn {
+	display: none;
+}
+
+/* Drawer close bar - hidden on desktop */
+.drawer-close-bar {
+	display: none;
+}
+
+/* Config back button - hidden on desktop */
+.config-back-btn {
+	display: none !important;
+}
+
+/* Drawer overlay */
+.drawer-overlay {
+	display: none;
+	position: fixed;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.6);
+	backdrop-filter: blur(4px);
+	-webkit-backdrop-filter: blur(4px);
+	z-index: 90;
+	opacity: 0;
+	transition: opacity 0.3s ease;
+	pointer-events: none;
+}
+
+.drawer-overlay.active {
+	display: block;
+	opacity: 1;
+	pointer-events: auto;
+}
+
+/* Drawer slide-in animation */
+@keyframes drawerSlideIn {
+	from { transform: translateX(-100%); }
+	to { transform: translateX(0); }
+}
+
+@keyframes drawerSlideOut {
+	from { transform: translateX(0); }
+	to { transform: translateX(-100%); }
+}
+
+/* =============================================
+   ASIDE PANEL - Desktop layout
+   ============================================= */
+.aside-panel,
+aside {
+	width: 24rem;
+	min-width: 24rem;
+	flex-shrink: 0;
+	min-height: 0;          /* allow flex child to shrink & enable overflow scroll */
+	overflow-y: auto !important;
+}
+
+.aside-panel::-webkit-scrollbar,
+aside::-webkit-scrollbar {
+	width: 6px !important;
+	display: block !important;
+}
+
+.aside-panel::-webkit-scrollbar-track,
+aside::-webkit-scrollbar-track {
+	background: rgba(0, 0, 0, 0.2) !important;
+}
+
+.aside-panel::-webkit-scrollbar-thumb,
+aside::-webkit-scrollbar-thumb {
+	background: rgba(240, 86, 39, 0.45) !important;
+	border-radius: 3px !important;
+}
+
+.aside-panel::-webkit-scrollbar-thumb:hover,
+aside::-webkit-scrollbar-thumb:hover {
+	background: rgba(240, 86, 39, 0.75) !important;
+}
+
+/* Desktop: Tools grid in 4 columns */
+@media (min-width: 993px) {
+	#toolsBtns {
+		grid-template-columns: repeat(4, 1fr) !important;
+	}
+}
+
+main {
+	min-height: 0;          /* allow flex child to shrink below content size */
+}
+
+/* =============================================
+   RESPONSIVE - Tablet & Mobile (<=992px)
+   Aside becomes a slide-in drawer
+   ============================================= */
+@media (max-width: 992px) {
+	/* Show hamburger button */
+	.mobile-menu-btn {
+		display: flex;
+	}
+
+	/* Aside becomes a fixed drawer */
+	aside {
+		position: fixed !important;
+		top: 0;
+		left: 0;
+		bottom: 0;
+		width: 85vw !important;
+		max-width: 380px !important;
+		min-width: 0 !important;
+		z-index: 100;
+		transform: translateX(-100%);
+		transition: transform 0.32s var(--spring-smooth);
+		border-right: 1px solid var(--cyber-border) !important;
+		overflow-y: auto !important;
+		box-shadow: none;
+		background: var(--cyber-bg-secondary) !important;
+	}
+
+	aside.drawer-open {
+		transform: translateX(0);
+		box-shadow: 4px 0 30px rgba(0, 0, 0, 0.7);
+	}
+
+	/* Drawer children: don't shrink, allow scroll */
+	aside > * {
+		flex-shrink: 0;
+	}
+
+	/* Show close bar inside drawer */
+	.drawer-close-bar {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin: -1rem -1rem 0.5rem -1rem;
+		padding: 0.75rem 1rem;
+		background: var(--cyber-elevated);
+		border-bottom: 1px solid var(--cyber-border);
+	}
+
+	/* Section takes full width since aside is out of flow */
+	section {
+		width: 100% !important;
+		overflow: hidden !important;
+	}
+
+	/* Results container: scrollable both ways */
+	#results {
+		overflow-x: auto !important;
+		overflow-y: auto !important;
+		-webkit-overflow-scrolling: touch;
+	}
+
+	/* Target panel: compact on mobile */
+	#panelTarget {
+		padding: 0.5rem !important;
+	}
+
+	#panelTarget .mb-4 {
+		margin-bottom: 0.5rem !important;
+	}
+
+	#panelTarget .mb-4 label {
+		margin-bottom: 0.25rem !important;
+	}
+
+	#panelTarget input[type="url"] {
+		padding: 0.5rem 0.75rem !important;
+		font-size: 0.8rem !important;
+	}
+
+	#panelTarget #checkBtn {
+		padding-top: 0.5rem !important;
+		padding-bottom: 0.5rem !important;
+		margin-bottom: 0.5rem !important;
+		font-size: 0.75rem !important;
+	}
+
+	/* Secondary buttons */
+	#secondaryBtns {
+		gap: 0.35rem !important;
+		margin-bottom: 0.5rem !important;
+	}
+
+	#secondaryBtns button {
+		padding-top: 0.35rem !important;
+		padding-bottom: 0.35rem !important;
+		font-size: 0.65rem !important;
+	}
+
+	/* Tools buttons: stay 2 cols on mobile, compact */
+	#toolsBtns {
+		grid-template-columns: repeat(2, 1fr) !important;
+		gap: 0.3rem !important;
+	}
+
+	#toolsBtns .tool-btn {
+		padding-top: 0.35rem !important;
+		padding-bottom: 0.35rem !important;
+		font-size: 0.6rem !important;
+	}
+
+	/* Prevent body scroll when drawer is open */
+	body.drawer-is-open {
+		overflow: hidden !important;
+	}
+
+	/* Results table scrollable */
+	#results {
+		overflow-x: auto !important;
+	}
+
+	#results table {
+		min-width: 640px;
+	}
+
+	/* ---- Payload Config Modal → slide-in drawer from left ---- */
+	#testConfigModal .modal-dialog {
+		margin: 0 !important;
+		max-width: 90vw !important;
+		width: 90vw;
+		height: 100vh;
+	}
+
+	/* Override Bootstrap fade: slide from left */
+	#testConfigModal.modal.fade .modal-dialog {
+		transform: translateX(-100%);
+		transition: transform 0.32s var(--spring-smooth);
+	}
+
+	#testConfigModal.modal.show .modal-dialog {
+		transform: translateX(0);
+	}
+
+	#testConfigModal .modal-content {
+		height: 100vh;
+		border-radius: 0 0.75rem 0.75rem 0 !important;
+		display: flex;
+		flex-direction: column;
+	}
+
+	#testConfigModal .modal-header {
+		border-radius: 0 0.75rem 0 0 !important;
+		flex-shrink: 0;
+	}
+
+	#testConfigModal .modal-footer {
+		border-radius: 0 0 0.75rem 0 !important;
+		flex-shrink: 0;
+	}
+
+	/* Body: fill remaining space */
+	#testConfigModal .modal-body {
+		height: auto !important;
+		max-height: none !important;
+		flex: 1 1 0 !important;
+		min-height: 0 !important;
+		overflow: hidden !important;
+	}
+
+	/* Inner container */
+	#testConfigModal .modal-body > div {
+		flex-direction: column !important;
+		height: 100% !important;
+		overflow: hidden !important;
+	}
+
+	/* ===== MOBILE NAVIGATION: one screen at a time ===== */
+
+	/* Screen 1: Category list - full height (default) */
+	#testConfigModal .modal-body > div > .w-64 {
+		width: 100% !important;
+		min-width: 100% !important;
+		flex: 1 1 0 !important;
+		max-height: none !important;
+		border-right: none !important;
+		border-bottom: none !important;
+		overflow-y: auto !important;
+	}
+
+	/* Category list: unrestricted (has full panel now) */
+	#testConfigModal #configCategoryList {
+		max-height: none !important;
+		flex: 1 1 0 !important;
+		overflow-y: auto !important;
+	}
+
+	/* Screen 2: Editor - hidden by default */
+	#testConfigModal .modal-body > div > .flex-1 {
+		display: none !important;
+	}
+
+	/* When editing: swap screens */
+	#testConfigModal .modal-body > div.config-editing > .w-64 {
+		display: none !important;
+	}
+
+	#testConfigModal .modal-body > div.config-editing > .flex-1 {
+		display: flex !important;
+		flex: 1 1 0 !important;
+		min-height: 0 !important;
+		overflow: hidden !important;
+	}
+
+	/* Back button: visible on mobile */
+	.config-back-btn {
+		display: flex !important;
+	}
+
+	/* Editor welcome page: scrollable */
+	#testConfigModal #configEditorEmpty {
+		overflow-y: auto !important;
+	}
+
+	/* Payload panels: ensure scrollable */
+	#testConfigModal #panelAttackPayloads,
+	#testConfigModal #panelFalsePayloads {
+		overflow: hidden !important;
+	}
+
+	#testConfigModal #configAttackPayloads,
+	#testConfigModal #configFalsePayloads {
+		overflow-y: auto !important;
+	}
+
+	/* Editor header: allow wrapping */
+	#testConfigModal #configEditor > .p-4:first-child .flex.items-center.justify-between {
+		flex-wrap: wrap;
+		gap: 0.5rem;
+	}
+}
+
+/* =============================================
+   RESPONSIVE - Phone landscape / small tablet (<=768px)
+   ============================================= */
+@media (max-width: 768px) {
+	/* Header: compact */
+	header {
+		padding-left: 0.5rem !important;
+		padding-right: 0.5rem !important;
+		gap: 0.25rem;
+	}
+
+	header h1 {
+		font-size: 0.95rem !important;
+	}
+
+	/* Features grid on welcome placeholder */
+	.results-placeholder .grid-cols-2 {
+		grid-template-columns: 1fr !important;
+	}
+
+	/* ===== RESULTS AREA ===== */
+	#results {
+		padding: 0.75rem !important;
+	}
+
+	/* Result banners: stack title + badges vertically */
+	#results > div > .flex.items-center.justify-between {
+		flex-direction: column !important;
+		align-items: flex-start !important;
+		gap: 0.5rem !important;
+	}
+
+	/* Status badge row: wrap on small screens */
+	#results .flex.items-center.gap-4.text-xs {
+		flex-wrap: wrap;
+		gap: 0.35rem !important;
+	}
+
+	/* Status badges: smaller */
+	#results .flex.items-center.gap-4.text-xs > span,
+	#results .flex.items-center.gap-4.text-xs > button {
+		font-size: 0.6rem !important;
+		padding: 0.2rem 0.5rem !important;
+	}
+
+	/* Banner icon: smaller */
+	#results .w-10.h-10 {
+		width: 2rem !important;
+		height: 2rem !important;
+	}
+
+	#results .w-10.h-10 svg {
+		width: 1rem !important;
+		height: 1rem !important;
+	}
+
+	/* Banner title text */
+	#results .text-sm.font-bold {
+		font-size: 0.75rem !important;
+	}
+
+	/* Explanation text block: compact */
+	#results > div > .mb-4.p-3 {
+		padding: 0.5rem !important;
+	}
+
+	#results > div > .mb-4.p-3 p {
+		font-size: 0.65rem !important;
+		line-height: 1.4 !important;
+	}
+
+	/* Summary card: compact */
+	#results > div > .bg-cyber-card.p-4 {
+		padding: 0.5rem !important;
+	}
+
+	#results > div > .bg-cyber-card.p-4 h4 {
+		font-size: 0.7rem !important;
+	}
+
+	#results > div > .bg-cyber-card.p-4 label {
+		padding: 0.35rem !important;
+		gap: 0.4rem !important;
+	}
+
+	#results > div > .bg-cyber-card.p-4 label span.text-sm {
+		font-size: 0.75rem !important;
+	}
+
+	/* Summary progress bars: narrower */
+	#results .max-w-\[200px\] {
+		max-width: 120px !important;
+	}
+
+	/* Table container: horizontal scroll */
+	#results .overflow-x-auto {
+		-webkit-overflow-scrolling: touch;
+	}
+
+	/* Table: more compact */
+	#results table th {
+		padding: 0.4rem 0.35rem !important;
+		font-size: 0.55rem !important;
+	}
+
+	#results table td {
+		padding: 0.3rem 0.35rem !important;
+		font-size: 0.7rem !important;
+	}
+
+	#results table code {
+		font-size: 0.55rem !important;
+		padding: 0.1rem 0.2rem !important;
+	}
+
+	/* Table: reduce min-width for smaller screens */
+	#results table {
+		min-width: 520px !important;
+	}
+
+	/* ===== PROGRESS BAR ===== */
+	#progressBar .px-6 {
+		padding-left: 0.75rem !important;
+		padding-right: 0.75rem !important;
+		padding-top: 0.5rem !important;
+		padding-bottom: 0.5rem !important;
+	}
+
+	#progressBar .text-2xl {
+		font-size: 1.1rem !important;
+	}
+
+	#progressBar .text-sm {
+		font-size: 0.7rem !important;
+	}
+
+	#progressBar .text-xs {
+		font-size: 0.6rem !important;
+	}
+
+	#progressBar .w-8 {
+		width: 1.5rem !important;
+		height: 1.5rem !important;
+	}
+
+	/* ===== EXPORT CONTROLS ===== */
+	#exportControls {
+		flex-wrap: wrap;
+		justify-content: center;
+		margin-left: 0.5rem !important;
+		margin-right: 0.5rem !important;
+	}
+
+	/* Batch modal: single column grid */
+	#batchModal .grid-cols-2 {
+		grid-template-columns: 1fr !important;
+	}
+
+	/* Analytics modal: reduce padding */
+	#analyticsModal > div > .relative {
+		max-width: 100% !important;
+		border-radius: 0.75rem;
+	}
+
+	#analyticsContent {
+		padding: 1rem !important;
+	}
+
+	/* HTTP codes modal */
+	#httpCodesModal .max-w-4xl {
+		max-width: 100% !important;
+	}
+
+	#httpCodesTableContent {
+		overflow-x: auto;
+	}
+
+	#httpCodesTableContent table {
+		min-width: 500px;
+	}
+}
+
+/* =============================================
+   RESPONSIVE - Phone portrait (<=640px)
+   ============================================= */
+@media (max-width: 640px) {
+	/* Header: very compact */
+	header {
+		height: auto !important;
+		min-height: 3rem;
+		padding-top: 0.4rem !important;
+		padding-bottom: 0.4rem !important;
+	}
+
+	header h1 {
+		font-size: 0.85rem !important;
+		white-space: nowrap;
+	}
+
+	/* Drawer: tighter padding */
+	aside {
+		padding: 0.75rem !important;
+		gap: 0.75rem !important;
+	}
+
+	.drawer-close-bar {
+		margin: -0.75rem -0.75rem 0.5rem -0.75rem;
+	}
+
+	/* Methods grid: 2 columns */
+	.methods-grid {
+		display: grid !important;
+		grid-template-columns: repeat(2, 1fr) !important;
+	}
+
+	/* Category checkboxes: single column */
+	#categoryCheckboxes {
+		grid-template-columns: 1fr !important;
+		max-height: 200px !important;
+	}
+
+	/* Advanced panel grids: single column on tiny screens (but not target buttons) */
+	aside .grid-cols-2:not(#secondaryBtns) {
+		grid-template-columns: 1fr !important;
+	}
+
+	/* Tools: 2 columns on small screens */
+	#toolsBtns {
+		grid-template-columns: repeat(2, 1fr) !important;
+		gap: 0.25rem !important;
+	}
+
+	#toolsBtns .tool-btn {
+		padding-top: 0.3rem !important;
+		padding-bottom: 0.3rem !important;
+		font-size: 0.55rem !important;
+	}
+
+	/* Welcome placeholder: compact */
+	.results-placeholder .flex.items-center.gap-5 {
+		gap: 0.75rem !important;
+	}
+
+	.results-placeholder .w-16 {
+		width: 2.5rem !important;
+		height: 2.5rem !important;
+	}
+
+	.results-placeholder .w-16 svg {
+		width: 1.5rem !important;
+		height: 1.5rem !important;
+	}
+
+	.results-placeholder .text-2xl {
+		font-size: 1.25rem !important;
+	}
+
+	/* Results: extra compact on phone */
+	#results {
+		padding: 0.5rem !important;
+	}
+
+	/* Hide time column on very small screens */
+	#results table {
+		min-width: 420px !important;
+	}
+
+	#results table th {
+		padding: 0.3rem 0.25rem !important;
+		font-size: 0.5rem !important;
+	}
+
+	#results table td {
+		padding: 0.25rem 0.25rem !important;
+		font-size: 0.6rem !important;
+	}
+
+	#results table code {
+		font-size: 0.5rem !important;
+		padding: 0.05rem 0.15rem !important;
+	}
+
+	/* Method/status badges: tiny */
+	#results table .px-2 {
+		padding-left: 0.25rem !important;
+		padding-right: 0.25rem !important;
+	}
+
+	/* Banner: hide icon, compact */
+	#results .w-10.h-10,
+	#results .w-2.h-2 {
+		display: none !important;
+	}
+
+	/* Status badges: single line text */
+	#results .flex.items-center.gap-4.text-xs > span {
+		padding: 0.15rem 0.35rem !important;
+		font-size: 0.55rem !important;
+	}
+
+	/* Explanation text: even smaller */
+	#results > div > .mb-4.p-3 {
+		padding: 0.35rem !important;
+		margin-bottom: 0.5rem !important;
+	}
+
+	#results > div > .mb-4.p-3 p {
+		font-size: 0.6rem !important;
+	}
+
+	/* Export controls: wrap */
+	#exportControls {
+		flex-wrap: wrap;
+		justify-content: center;
+		padding: 0.35rem !important;
+		margin: 0 0.25rem 0.25rem 0.25rem !important;
+	}
+
+	/* Status bars: compact */
+	.status-bar {
+		font-size: 0.65rem;
+		height: 1.25rem;
+		line-height: 1.25rem;
+		padding-left: 0.4rem;
+	}
+
+	.min-width-112 {
+		min-width: 5rem;
+	}
+
+	/* Footer */
+	footer {
+		flex-wrap: wrap;
+		height: auto !important;
+		padding: 0.5rem;
+		gap: 0.25rem;
+	}
+
+	footer .mx-2 {
+		display: none;
+	}
+
+	/* Config modal: full width on phone */
+	#testConfigModal .modal-dialog {
+		max-width: 100vw !important;
+		width: 100vw;
+	}
+
+	#testConfigModal .modal-content {
+		border-radius: 0 !important;
+	}
+
+	#testConfigModal .modal-header {
+		border-radius: 0 !important;
+		padding: 0.75rem 1rem !important;
+	}
+
+	#testConfigModal .modal-header .modal-title {
+		font-size: 0.85rem !important;
+	}
+
+	#testConfigModal .modal-footer {
+		border-radius: 0 !important;
+		padding: 0.5rem 0.75rem !important;
+	}
+
+	/* Config category list items: compact */
+	#configCategoryList button,
+	#configCategoryList > div {
+		font-size: 0.8rem !important;
+	}
+
+	/* Editor: compact header */
+	#testConfigModal #configEditor > .p-4:first-child {
+		padding: 0.5rem 0.75rem !important;
+	}
+
+	#testConfigModal #configCategoryName {
+		font-size: 0.9rem !important;
+	}
+
+	/* Payload tabs: compact */
+	#testConfigModal #tabAttackPayloads,
+	#testConfigModal #tabFalsePayloads {
+		padding: 0.5rem 0.5rem !important;
+		font-size: 0.7rem !important;
+		gap: 0.25rem !important;
+	}
+
+	#testConfigModal #tabAttackPayloads svg,
+	#testConfigModal #tabFalsePayloads svg {
+		width: 0.85rem !important;
+		height: 0.85rem !important;
+	}
+
+	/* Payload panels: compact padding */
+	#testConfigModal #panelAttackPayloads,
+	#testConfigModal #panelFalsePayloads {
+		padding: 0.5rem !important;
+	}
+
+	/* Payload editor inputs */
+	#configAttackPayloads input,
+	#configFalsePayloads input {
+		font-size: 0.75rem !important;
+		padding: 0.35rem 0.5rem !important;
+	}
+
+	/* Analytics grid */
+	#analyticsContent .grid-cols-2,
+	#analyticsContent .grid-cols-4 {
+		grid-template-columns: repeat(2, 1fr) !important;
+	}
+
+	#analyticsContent .grid-cols-3 {
+		grid-template-columns: 1fr !important;
+	}
+}
+
+/* =============================================
+   RESPONSIVE - Very small phone (<=400px)
+   ============================================= */
+@media (max-width: 400px) {
+	header h1 {
+		font-size: 0.75rem !important;
+	}
+
+	aside {
+		padding: 0.5rem !important;
+	}
+
+	.drawer-close-bar {
+		margin: -0.5rem -0.5rem 0.5rem -0.5rem;
+	}
+
+	#results {
+		padding: 0.5rem !important;
+	}
+
+	/* Summary bars: stack count label */
+	.min-width-112 {
+		min-width: 4rem;
+		font-size: 0.65rem;
+	}
+
+	/* Modals: edge to edge */
+	.fixed.inset-0 > .relative {
+		border-radius: 0.5rem !important;
+	}
+
+	/* Target widget: ultra compact */
+	#panelTarget #checkBtn {
+		padding-top: 0.4rem !important;
+		padding-bottom: 0.4rem !important;
+		font-size: 0.7rem !important;
+	}
+
+	#secondaryBtns button {
+		font-size: 0.55rem !important;
+		padding-top: 0.3rem !important;
+		padding-bottom: 0.3rem !important;
+	}
+
+	#toolsBtns {
+		grid-template-columns: repeat(2, 1fr) !important;
+		gap: 0.2rem !important;
+	}
+
+	#toolsBtns .tool-btn {
+		font-size: 0.5rem !important;
+		padding-top: 0.25rem !important;
+		padding-bottom: 0.25rem !important;
+	}
+
+	/* Analytics: single column */
+	#analyticsContent .grid-cols-2,
+	#analyticsContent .grid-cols-4 {
+		grid-template-columns: 1fr !important;
+	}
+}
+
+/* Global recon tooltip */
+#reconTooltip {
+	position: fixed;
+	z-index: 9999;
+	background: var(--cyber-card);
+	color: #cbd5e1;
+	font-size: 11px;
+	line-height: 1.4;
+	padding: 8px 12px;
+	border-radius: 8px;
+	border: 1px solid var(--cyber-border);
+	box-shadow: 0 12px 32px rgba(0, 0, 0, 0.7);
+	max-width: 280px;
+	pointer-events: none;
+	opacity: 0;
+	transform: scale(0.96) translateY(4px);
+	transition: opacity .18s ease, transform .18s var(--spring-bounce);
+}
+#reconTooltip.visible {
+	opacity: 1;
+	transform: scale(1) translateY(0);
+}
+.recon-tip {
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	vertical-align: middle !important;
+	line-height: 1 !important;
+	margin-left: 0 !important;
+	cursor: help;
+	flex-shrink: 0;
+	position: relative;
+	top: -0.5px;
+	transition: transform .15s var(--spring-bounce);
+}
+.recon-tip:hover {
+	transform: scale(1.15);
+}
+.recon-tip svg {
+	display: block;
+	width: 14px;
+	height: 14px;
+	vertical-align: middle;
+}
+
+/* =============================================
+   API DOCS PANEL
+   ============================================= */
+#apiDocsPanel {
+	transition: opacity .25s var(--spring-smooth);
+}
+
+/* Endpoint collapse/expand */
+.ep-body {
+	max-height: 600px;
+	overflow: hidden;
+	transition: max-height .28s var(--spring-smooth), padding .28s var(--spring-smooth), opacity .2s ease;
+	opacity: 1;
+}
+.ep-body.ep-collapsed {
+	max-height: 0;
+	padding-top: 0 !important;
+	padding-bottom: 0 !important;
+	opacity: 0;
+}
+
+/* Chevron rotation */
+.ep-body.ep-collapsed ~ div svg:last-child,
+div:has(+ .ep-body.ep-collapsed) svg:last-child {
+	transform: rotate(-90deg);
+	transition: transform .25s var(--spring-bounce);
+}
+
+/* Input focus (clean outline, NO GLOW) */
+#apiDocsDomain:focus {
+	border-color: #f05627;
+	box-shadow: 0 0 0 1px #f05627;
+}
