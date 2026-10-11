@@ -69,53 +69,52 @@ async function refreshPPOModalUI() {
 		const updates = prof.totalUpdates || 0;
 		const actionRows = prof.actorWeights?.length || 0;
 		profilesListHtml += `
-			<div class="p-3 bg-cyber-elevated/40 border border-white/[0.06] rounded-xl flex items-center justify-between">
-				<div class="flex items-center gap-2.5">
-					<div class="w-2 h-2 rounded-full ${updates > 0 ? 'bg-cyber-accent animate-pulse' : 'bg-slate-500'}"></div>
-					<div>
+			<div class="p-2.5 bg-cyber-elevated/40 hover:bg-cyber-elevated/70 border border-white/[0.06] hover:border-white/[0.12] rounded-xl flex items-center justify-between transition-colors">
+				<div class="flex items-center gap-2 min-w-0">
+					<div class="w-2 h-2 rounded-full shrink-0 ${updates > 0 ? 'bg-cyber-accent animate-pulse' : 'bg-slate-500'}"></div>
+					<div class="truncate">
 						<span class="text-xs font-bold text-white font-mono">${escapeHtml(key)}</span>
-						<span class="text-[10px] text-slate-400 ml-2">(${actionRows} actions)</span>
+						<span class="text-[10px] text-slate-400 ml-1.5">(${actionRows} acts)</span>
 					</div>
 				</div>
-				<span class="text-[11px] font-mono px-2 py-0.5 rounded bg-black/40 border border-white/[0.08] text-cyber-accent font-semibold">
-					${updates} updates
+				<span class="text-[10px] font-mono px-2 py-0.5 rounded bg-black/40 border border-white/[0.08] text-cyber-accent font-semibold shrink-0">
+					${updates} upd
 				</span>
 			</div>
 		`;
 	}
 
 	content.innerHTML = `
-		<div class="space-y-5">
+		<div class="space-y-4">
 			<!-- Overview Banner -->
-			<div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-				<div class="p-3.5 bg-cyber-elevated/60 border border-white/[0.08] rounded-xl">
-					<span class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold block mb-1">Model Version</span>
+			<div class="grid grid-cols-3 gap-2.5">
+				<div class="p-3 bg-cyber-elevated/60 border border-white/[0.08] rounded-xl">
+					<span class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold block mb-0.5">Model Version</span>
 					<span class="text-sm font-bold text-white font-mono">v${ppoModalData.version || 1}</span>
 				</div>
-				<div class="p-3.5 bg-cyber-elevated/60 border border-white/[0.08] rounded-xl">
-					<span class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold block mb-1">Total RL Updates</span>
+				<div class="p-3 bg-cyber-elevated/60 border border-white/[0.08] rounded-xl">
+					<span class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold block mb-0.5">Total RL Updates</span>
 					<span class="text-sm font-bold text-cyber-accent font-mono">${totalUpdates}</span>
 				</div>
-				<div class="p-3.5 bg-cyber-elevated/60 border border-white/[0.08] rounded-xl">
-					<span class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold block mb-1">Last Updated</span>
+				<div class="p-3 bg-cyber-elevated/60 border border-white/[0.08] rounded-xl">
+					<span class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold block mb-0.5">Last Updated</span>
 					<span class="text-xs font-semibold text-slate-300 font-mono truncate block" title="${updatedAt}">${updatedAt}</span>
 				</div>
 			</div>
-
 
 			<!-- Active WAF Profiles -->
 			<div>
 				<div class="flex items-center justify-between mb-2">
 					<h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-0">Trained WAF Profiles</h4>
-					<span class="text-[10px] text-slate-400">${profileKeys.length} profiles</span>
+					<span class="text-[10px] text-slate-400 font-mono">${profileKeys.length} profiles</span>
 				</div>
-				<div class="space-y-2 max-h-40 overflow-y-auto pr-1">
+				<div class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[290px] overflow-y-auto pr-1">
 					${profilesListHtml}
 				</div>
 			</div>
 
 			<!-- Terminal CLI Shortcut -->
-			<div class="p-3 bg-black/40 border border-white/[0.08] rounded-xl flex items-center justify-between">
+			<div class="p-2.5 bg-black/40 border border-white/[0.08] rounded-xl flex items-center justify-between">
 				<div class="flex items-center gap-2 overflow-hidden">
 					<span class="text-[10px] font-mono text-slate-500 select-none">$</span>
 					<span class="text-xs font-mono text-slate-200 truncate">npm run ppo:save</span>
