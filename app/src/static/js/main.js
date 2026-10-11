@@ -1165,7 +1165,7 @@ async function fetchResults() {
 		btn.textContent = oldText;
 		hideProgress();
 		if (typeof window.refreshPPODashboardWidget === 'function') {
-			window.refreshPPODashboardWidget();
+			window.refreshPPODashboardWidget(true);
 		}
 	}
 }

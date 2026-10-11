@@ -11,6 +11,7 @@
 		"test": "vitest",
 		"cf-typegen": "wrangler types",
 		"ppo:save": "node scripts/save-ppo-weights.js",
+		"ppo:watch": "node scripts/save-ppo-weights.js --watch",
 		"ppo:train": "node scripts/train-all-wafs.js",
 		"modsec:start": "node scripts/run-modsecurity.js start",
 		"modsec:stop": "node scripts/run-modsecurity.js stop",

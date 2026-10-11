@@ -43,34 +43,61 @@ function fetchJson(urlStr) {
 	});
 }
 
+let lastSavedKey = '';
+
+async function saveWeightsOnce(apiUrl) {
+	const weightsData = await fetchJson(apiUrl);
+	if (!weightsData || typeof weightsData !== 'object' || !weightsData.profiles) {
+		throw new Error('Invalid weights payload received: missing "profiles" key.');
+	}
+
+	const profileKeys = Object.keys(weightsData.profiles || {});
+	const totalUpdates = typeof weightsData.totalUpdates === 'number'
+		? weightsData.totalUpdates
+		: Object.values(weightsData.profiles || {}).reduce((sum, p) => sum + (p.updateCount || p.totalUpdates || 0), 0);
+
+	const currentKey = `${totalUpdates}_${weightsData.updatedAt || ''}`;
+	if (currentKey === lastSavedKey) {
+		return false; // No changes
+	}
+
+	// Ensure directory exists
+	fs.mkdirSync(path.dirname(TARGET_FILE), { recursive: true });
+
+	const formattedJson = JSON.stringify(weightsData, null, 2) + '\n';
+	fs.writeFileSync(TARGET_FILE, formattedJson, 'utf8');
+	lastSavedKey = currentKey;
+
+	console.log(`\x1b[32m✔ SUCCESS:\x1b[0m PPO weights auto-saved to \x1b[1m${path.relative(process.cwd(), TARGET_FILE)}\x1b[0m`);
+	console.log(`   • Profiles saved : ${profileKeys.join(', ') || 'default'}`);
+	console.log(`   • Total updates  : ${totalUpdates}`);
+	console.log(`   • Version        : ${weightsData.version || 1}`);
+	console.log(`   • Last updated   : ${weightsData.updatedAt || 'now'}\n`);
+	return true;
+}
+
 async function main() {
-	const apiUrl = process.argv[2] || DEFAULT_URL;
+	const isWatch = process.argv.includes('--watch') || process.argv.includes('-w');
+	const customUrl = process.argv.find((arg) => arg.startsWith('http://') || arg.startsWith('https://'));
+	const apiUrl = customUrl || DEFAULT_URL;
+
+	if (isWatch) {
+		console.log(`\x1b[36m[WAFinity PPO Auto-Save Watcher]\x1b[0m Monitoring ${apiUrl} every 3s...`);
+		const check = async () => {
+			try {
+				await saveWeightsOnce(apiUrl);
+			} catch (err) {
+				// Silent or minimal retry log in watch mode
+			}
+		};
+		await check();
+		setInterval(check, 3000);
+		return;
+	}
+
 	console.log(`\x1b[36m[WAFinity PPO Sync]\x1b[0m Fetching trained weights from ${apiUrl}...`);
-
 	try {
-		const weightsData = await fetchJson(apiUrl);
-
-		if (!weightsData || typeof weightsData !== 'object' || !weightsData.profiles) {
-			throw new Error('Invalid weights payload received: missing "profiles" key.');
-		}
-
-		// Ensure directory exists
-		fs.mkdirSync(path.dirname(TARGET_FILE), { recursive: true });
-
-		const formattedJson = JSON.stringify(weightsData, null, 2) + '\n';
-		fs.writeFileSync(TARGET_FILE, formattedJson, 'utf8');
-
-		const profileKeys = Object.keys(weightsData.profiles || {});
-		const totalUpdates = Object.values(weightsData.profiles || {}).reduce(
-			(sum, p) => sum + (p.totalUpdates || 0),
-			0
-		);
-
-		console.log(`\x1b[32m✔ SUCCESS:\x1b[0m PPO weights saved to \x1b[1m${path.relative(process.cwd(), TARGET_FILE)}\x1b[0m`);
-		console.log(`   • Profiles saved : ${profileKeys.join(', ') || 'default'}`);
-		console.log(`   • Total updates  : ${totalUpdates}`);
-		console.log(`   • Version        : ${weightsData.version || 1}`);
-		console.log(`   • Last updated   : ${weightsData.updatedAt || 'now'}\n`);
+		await saveWeightsOnce(apiUrl);
 		console.log(`\x1b[33mTo share with friends:\x1b[0m`);
 		console.log(`   git add src/ppo-weights.json`);
 		console.log(`   git commit -m "sync: update PPO RL bypass weights"`);

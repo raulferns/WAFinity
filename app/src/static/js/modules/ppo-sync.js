@@ -5,11 +5,60 @@
 
 let ppoModalData = null;
 
+const PPO_LOCAL_STORAGE_KEY = 'wafchecker_ppo_weights_backup';
+
+function autoSavePPOWeightsLocally(data) {
+	if (!data || !data.profiles || typeof data.profiles !== 'object') return;
+	try {
+		localStorage.setItem(PPO_LOCAL_STORAGE_KEY, JSON.stringify(data));
+	} catch (e) {
+		console.warn('[PPO Auto-Save] Local storage full or unavailable:', e);
+	}
+}
+
+async function syncPPOWeightsWithServer(serverData) {
+	if (!serverData) return null;
+	const localRaw = localStorage.getItem(PPO_LOCAL_STORAGE_KEY);
+	if (!localRaw) {
+		if (serverData.totalUpdates > 0) {
+			autoSavePPOWeightsLocally(serverData);
+		}
+		return serverData;
+	}
+
+	try {
+		const localParsed = JSON.parse(localRaw);
+		const localUpdates = typeof localParsed?.totalUpdates === 'number' ? localParsed.totalUpdates : 0;
+		const serverUpdates = typeof serverData?.totalUpdates === 'number' ? serverData.totalUpdates : 0;
+
+		// If server was restarted with zero or fewer updates, automatically restore saved progress
+		if (localUpdates > serverUpdates) {
+			console.log(`[PPO Auto-Sync] Server at ${serverUpdates} updates; auto-restoring ${localUpdates} saved updates...`);
+			const res = await fetch('/api/ppo-weights', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ action: 'import', weights: localParsed }),
+			});
+			if (res.ok) {
+				const json = await res.json();
+				return json.weights || localParsed;
+			}
+		} else if (serverUpdates >= localUpdates && serverUpdates > 0) {
+			autoSavePPOWeightsLocally(serverData);
+		}
+	} catch (err) {
+		console.warn('[PPO Auto-Sync] Error during auto-sync:', err);
+	}
+
+	return serverData;
+}
+
 async function fetchPPOWeightsData() {
 	try {
 		const res = await fetch('/api/ppo-weights');
 		if (!res.ok) throw new Error(`HTTP ${res.status}`);
-		return await res.json();
+		const raw = await res.json();
+		return await syncPPOWeightsWithServer(raw);
 	} catch (e) {
 		console.error('[PPO Sync] Error fetching weights:', e);
 		return null;
@@ -215,6 +264,9 @@ async function resetPPOWeights() {
 
 		// Clear cached data so the UI doesn't use stale in-memory data
 		cachedWeightsData = null;
+		try {
+			localStorage.removeItem(PPO_LOCAL_STORAGE_KEY);
+		} catch {}
 
 		await refreshPPOModalUI();
 		await refreshPPODashboardWidget(true);

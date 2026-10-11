@@ -1,4 +1,8 @@
 {
+  "scripts": {
+    "ppo:save": "node app/scripts/save-ppo-weights.js",
+    "ppo:watch": "node app/scripts/save-ppo-weights.js --watch"
+  },
   "devDependencies": {
     "wrangler": "^4.17.0"
   }
