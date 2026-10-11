@@ -452,7 +452,7 @@ function renderReport(results, falsePositiveMode = false) {
 	} else {
 		const statusBadge = isProtected
 			? `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 tracking-wide uppercase"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>Protected</span>`
-			: `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-500/10 border border-red-500/30 text-red-500 tracking-wide uppercase"><span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>Vulnerable (${bypassedTests} Bypassed)</span>`;
+			: '';
 		const iconColor = isProtected ? 'text-emerald-400' : 'text-red-500';
 		const iconBoxBg = isProtected ? 'bg-emerald-500/10 border-emerald-500/25' : 'bg-red-500/10 border-red-500/25';
 
