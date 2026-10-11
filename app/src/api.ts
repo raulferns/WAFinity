@@ -193,7 +193,8 @@ async function sendRequest(
 			responseTime,
 			response: resp,
 		};
-	} catch (e) {
+	} catch (e: any) {
+		console.error(`[sendRequest failed] ${method} ${url}:`, e?.message || e);
 		return { status: 'ERR', is_redirect: false, responseTime: 0 };
 	}
 }
