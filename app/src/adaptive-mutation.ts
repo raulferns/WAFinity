@@ -188,6 +188,33 @@ const MUTATION_ACTIONS: MutationAction[] = [
 		label: 'Plus spacing',
 		mutate: (payload) => payload.replace(/\s+/g, '+'),
 	},
+	{
+		id: 'multi_whitespace',
+		label: 'Multi-whitespace (%0c/%0a)',
+		mutate: (payload) => payload.replace(/\s+/g, (m, offset) => (offset % 2 === 0 ? '%0c' : '%0a')),
+	},
+	{
+		id: 'null_byte',
+		label: 'Null-byte evasion',
+		mutate: (payload) => (payload.includes('%00') ? payload : payload.replace(/(\b[a-zA-Z0-9_-]+)(?=[ '";<]|$)/g, '$1%00')),
+	},
+	{
+		id: 'case_url_mix',
+		label: 'Mid-word URL mix',
+		mutate: (payload) =>
+			payload.replace(/(select|union|script|alert|exec|where|from|order|group)/gi, (kw) =>
+				kw
+					.split('')
+					.map((c, i) => (i === 1 ? `%${c.charCodeAt(0).toString(16)}` : i % 2 === 0 ? c.toUpperCase() : c.toLowerCase()))
+					.join(''),
+			),
+	},
+	{
+		id: 'hex_encode',
+		label: 'Hex string literal',
+		mutate: (payload) =>
+			payload.replace(/'([^'\s]+)'/g, (_, s) => '0x' + [...s].map((c) => c.charCodeAt(0).toString(16)).join('')),
+	},
 ];
 
 // =============================================

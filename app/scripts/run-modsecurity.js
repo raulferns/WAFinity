@@ -69,7 +69,7 @@ function startContainer() {
 	console.log(`   • Backend   : ${BACKEND}\n`);
 
 	try {
-		const cmd = `docker run -d --name ${CONTAINER_NAME} -p ${PORT}:80 -e PARANOIA=${PARANOIA} -e BACKEND=${BACKEND} ${IMAGE_NAME}`;
+		const cmd = `docker run -d --name ${CONTAINER_NAME} -p ${PORT}:8080 -e PARANOIA=${PARANOIA} -e BACKEND=${BACKEND} ${IMAGE_NAME}`;
 		const containerId = execSync(cmd, { encoding: 'utf8' }).trim();
 
 		console.log(`\x1b[32m✔ ModSecurity WAF is LIVE!\x1b[0m Container ID: ${containerId.slice(0, 12)}`);

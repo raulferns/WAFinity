@@ -5,9 +5,8 @@ services:
     image: owasp/modsecurity-crs:apache
     container_name: wafinity-modsecurity
     ports:
-      - "8080:80"
+      - "8080:8080"
     environment:
       - PARANOIA=2
       - BACKEND=http://httpbin.org
-      - PORT=80
     restart: unless-stopped

@@ -16,7 +16,7 @@ docker stop wafinity-modsecurity 2>$null | Out-Null
 docker rm wafinity-modsecurity 2>$null | Out-Null
 
 Write-Host "[*] Launching owasp/modsecurity-crs on port 8080..." -ForegroundColor Cyan
-docker run -d --name wafinity-modsecurity -p 8080:80 -e PARANOIA=2 -e BACKEND=http://httpbin.org owasp/modsecurity-crs:apache
+docker run -d --name wafinity-modsecurity -p 8080:8080 -e PARANOIA=2 -e BACKEND=http://httpbin.org owasp/modsecurity-crs:apache
 
 if ($LASTEXITCODE -eq 0) {
     Write-Host ""

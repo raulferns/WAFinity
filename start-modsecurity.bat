@@ -25,7 +25,7 @@ echo - Paranoia Level: 2
 echo - Backend: http://httpbin.org
 echo.
 
-docker run -d --name wafinity-modsecurity -p 8080:80 -e PARANOIA=2 -e BACKEND=http://httpbin.org owasp/modsecurity-crs:apache
+docker run -d --name wafinity-modsecurity -p 8080:8080 -e PARANOIA=2 -e BACKEND=http://httpbin.org owasp/modsecurity-crs:apache
 
 if %errorlevel% neq 0 (
     echo.
