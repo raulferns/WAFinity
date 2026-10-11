@@ -8,7 +8,7 @@ import {
 	generateEncodedPayloads,
 } from './advanced-payloads';
 import { HTTPManipulator, ManipulatedRequest, HTTPManipulationOptions } from './http-manipulation';
-import { AdaptiveMutationDecision, AdaptivePPOPayloadMutator } from './adaptive-mutation';
+import { AdaptiveMutationDecision, AdaptivePPOPayloadMutator, ppoWeightsManager } from './adaptive-mutation';
 
 // =============================================
 // RATE LIMITER (in-memory, per-IP)
@@ -350,6 +350,33 @@ export default {
 				adaptiveMutation,
 			);
 			return new Response(JSON.stringify(results), { headers: { 'content-type': 'application/json; charset=UTF-8' } });
+		}
+		if (urlObj.pathname === '/api/ppo-weights') {
+			if (request.method === 'POST') {
+				try {
+					const body = (await request.json()) as any;
+					if (body.action === 'reset') {
+						ppoWeightsManager.resetToDefaults();
+					} else if (body.profiles) {
+						ppoWeightsManager.importWeights(body);
+					}
+					return apiJsonResponse({ success: true, weights: ppoWeightsManager.getAllWeights() });
+				} catch (e: any) {
+					return apiJsonResponse({ error: 'Failed to update PPO weights', message: e?.message }, 400);
+				}
+			}
+			const download = urlObj.searchParams.get('download') === '1';
+			const weights = ppoWeightsManager.getAllWeights();
+			return new Response(JSON.stringify(weights, null, 2), {
+				status: 200,
+				headers: {
+					'content-type': 'application/json; charset=UTF-8',
+					'access-control-allow-origin': '*',
+					'access-control-allow-methods': 'GET, POST, OPTIONS',
+					'access-control-allow-headers': 'Content-Type',
+					...(download ? { 'content-disposition': 'attachment; filename="ppo-weights.json"' } : {}),
+				},
+			});
 		}
 		if (urlObj.pathname === '/api/http-manipulation') {
 			return await handleHTTPManipulation(request);
@@ -827,7 +854,7 @@ async function handleApiCheckStream(request: Request): Promise<Response> {
 				}
 
 				const detectedWAFType = detectedWAF || (wafDetectionResult?.detected ? wafDetectionResult.wafType : undefined);
-				const adaptiveMutator = adaptiveMutation ? new AdaptivePPOPayloadMutator(falsePositiveTest) : undefined;
+				const adaptiveMutator = adaptiveMutation ? new AdaptivePPOPayloadMutator(falsePositiveTest, detectedWAFType) : undefined;
 
 				// Build all test requests
 				for (const [category, info] of payloadEntries) {
@@ -909,7 +936,7 @@ async function handleApiCheckStream(request: Request): Promise<Response> {
 							let originalPayload = req.payload;
 							let adaptiveDecision: AdaptiveMutationDecision | undefined;
 							let adaptiveUpdate:
-								| { reward: number; updatedProbability: number; valueEstimate: number }
+								| { reward: number; statusReward: number; constraintPenalty: number; bloatPenalty: number; updatedProbability: number; valueEstimate: number; advantage: number }
 								| undefined;
 							let headersObj = req.headersObj;
 
@@ -918,7 +945,7 @@ async function handleApiCheckStream(request: Request): Promise<Response> {
 								finalPayload = undefined;
 							} else if (req.checkType === 'ParamCheck' && finalPayload !== undefined) {
 								if (adaptiveMutator) {
-									adaptiveDecision = adaptiveMutator.mutate(finalPayload);
+									adaptiveDecision = adaptiveMutator.mutate(finalPayload, req.category);
 									originalPayload = adaptiveDecision.originalPayload;
 									finalPayload = adaptiveDecision.payload;
 								}
@@ -964,6 +991,19 @@ async function handleApiCheckStream(request: Request): Promise<Response> {
 											oldProbability: Number(adaptiveDecision.oldProbability.toFixed(4)),
 											updatedProbability: Number(adaptiveUpdate.updatedProbability.toFixed(4)),
 											valueEstimate: Number(adaptiveUpdate.valueEstimate.toFixed(4)),
+											advantage: Number(adaptiveUpdate.advantage.toFixed(4)),
+											statusReward: Number(adaptiveUpdate.statusReward.toFixed(4)),
+											constraintPenalty: Number(adaptiveUpdate.constraintPenalty.toFixed(4)),
+											bloatPenalty: Number(adaptiveUpdate.bloatPenalty.toFixed(4)),
+											valid: adaptiveDecision.validation.valid,
+											validationReasons: adaptiveDecision.validation.reasons,
+											bloatRatio: Number(adaptiveDecision.validation.bloatRatio.toFixed(2)),
+											state: {
+												length: adaptiveDecision.state.length,
+												tokens: adaptiveDecision.state.tokenCount,
+												keywords: adaptiveDecision.state.keywordCount,
+												encodedRatio: Number(adaptiveDecision.state.encodedRatio.toFixed(2)),
+											},
 										}
 									: undefined,
 							};
@@ -988,6 +1028,11 @@ async function handleApiCheckStream(request: Request): Promise<Response> {
 					});
 
 					await Promise.allSettled(batchPromises);
+				}
+
+				// Persist learned weights to persistent manager
+				if (adaptiveMutator) {
+					adaptiveMutator.persistToManager();
 				}
 
 				// Send completion
@@ -1123,7 +1168,7 @@ async function handleApiCheckFiltered(
 		categories && categories.length
 			? Object.entries(payloadSource).filter(([cat]) => categories.includes(cat))
 			: Object.entries(payloadSource);
-	const adaptiveMutator = adaptiveMutation ? new AdaptivePPOPayloadMutator(falsePositiveTest) : undefined;
+	const adaptiveMutator = adaptiveMutation ? new AdaptivePPOPayloadMutator(falsePositiveTest, detectedWAF) : undefined;
 	for (const [category, info] of payloadEntries) {
 		const checkType = info.type || 'ParamCheck';
 		const payloads = falsePositiveTest ? info.falsePayloads || [] : info.payloads || [];
@@ -1157,11 +1202,11 @@ async function handleApiCheckFiltered(
 						if (offset >= start) {
 							let adaptiveDecision: AdaptiveMutationDecision | undefined;
 							let adaptiveUpdate:
-								| { reward: number; updatedProbability: number; valueEstimate: number }
+								| { reward: number; statusReward: number; constraintPenalty: number; bloatPenalty: number; updatedProbability: number; valueEstimate: number; advantage: number }
 								| undefined;
 							let finalPayload = currentPayload;
 							if (adaptiveMutator) {
-								adaptiveDecision = adaptiveMutator.mutate(currentPayload);
+								adaptiveDecision = adaptiveMutator.mutate(currentPayload, category);
 								finalPayload = adaptiveDecision.payload;
 							}
 
@@ -1213,6 +1258,19 @@ async function handleApiCheckFiltered(
 											oldProbability: Number(adaptiveDecision.oldProbability.toFixed(4)),
 											updatedProbability: Number(adaptiveUpdate.updatedProbability.toFixed(4)),
 											valueEstimate: Number(adaptiveUpdate.valueEstimate.toFixed(4)),
+											advantage: Number(adaptiveUpdate.advantage.toFixed(4)),
+											statusReward: Number(adaptiveUpdate.statusReward.toFixed(4)),
+											constraintPenalty: Number(adaptiveUpdate.constraintPenalty.toFixed(4)),
+											bloatPenalty: Number(adaptiveUpdate.bloatPenalty.toFixed(4)),
+											valid: adaptiveDecision.validation.valid,
+											validationReasons: adaptiveDecision.validation.reasons,
+											bloatRatio: Number(adaptiveDecision.validation.bloatRatio.toFixed(2)),
+											state: {
+												length: adaptiveDecision.state.length,
+												tokens: adaptiveDecision.state.tokenCount,
+												keywords: adaptiveDecision.state.keywordCount,
+												encodedRatio: Number(adaptiveDecision.state.encodedRatio.toFixed(2)),
+											},
 										}
 									: undefined,
 							});
@@ -1309,6 +1367,9 @@ async function handleApiCheckFiltered(
 				}
 			}
 		}
+	}
+	if (adaptiveMutator) {
+		adaptiveMutator.persistToManager();
 	}
 	return results;
 }

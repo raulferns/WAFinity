@@ -304,7 +304,7 @@ function renderResultRow(r, falsePositiveMode = false) {
 	const responseTime = r.responseTime || 0;
 	const isSlow = responseTime >= SLOW_RESPONSE_THRESHOLD;
 	const adaptiveHtml = r.adaptiveMutation
-		? `<div class="mt-1 text-[10px] text-cyber-accent font-mono">PPO: ${escapeHtml(r.adaptiveMutation.actionLabel || r.adaptiveMutation.action)} (${Number(r.adaptiveMutation.reward || 0).toFixed(2)})</div>`
+		? `<div class="mt-1 text-[10px] ${r.adaptiveMutation.valid === false ? 'text-amber-400' : 'text-cyber-accent'} font-mono">PPO: ${escapeHtml(r.adaptiveMutation.actionLabel || r.adaptiveMutation.action)} reward ${Number(r.adaptiveMutation.reward || 0).toFixed(2)}${r.adaptiveMutation.constraintPenalty ? `, penalty ${Number(r.adaptiveMutation.constraintPenalty).toFixed(2)}` : ''}</div>`
 		: '';
 
 	// Response time display with slow indicator
