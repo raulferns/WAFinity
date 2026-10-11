@@ -1222,13 +1222,11 @@ function restoreStateFromLocalStorage() {
 		}
 	}
 
-	// Auto detect WAF
+	// Auto detect WAF (defaults to ON)
 	const autoDetectWAF = localStorage.getItem('wafchecker_autoDetectWAF');
-	if (autoDetectWAF !== null) {
-		const el = document.getElementById('autoDetectWAF');
-		if (el) {
-			el.checked = autoDetectWAF === '1';
-		}
+	const autoDetectEl = document.getElementById('autoDetectWAF');
+	if (autoDetectEl) {
+		autoDetectEl.checked = autoDetectWAF !== null ? autoDetectWAF === '1' : true;
 	}
 
 	// HTTP Manipulation

@@ -159,11 +159,18 @@
 					
 					<!-- Target Panel -->
 					<div id="panelTarget" class="p-3">
-						<div class="mb-4">
+						<div class="mb-3">
 							<label for="url" class="block text-[11px] font-semibold text-slate-400 mb-1.5 uppercase tracking-wide">Target URL</label>
 							<input type="url" id="url" name="url" 
 								   class="w-full bg-cyber-elevated border border-white/[0.1] rounded-xl px-3.5 py-2.5 text-xs font-mono text-slate-100 placeholder-slate-500 focus:border-cyber-accent focus:ring-1 focus:ring-cyber-accent/30 outline-none transition-all shadow-none"
 								   placeholder="https://target-url.com" required />
+						</div>
+						<!-- Adaptive PPO payload mutation -->
+						<div class="mb-3">
+							<label class="flex items-center gap-2 px-2 py-1.5 bg-cyber-elevated/50 rounded cursor-pointer hover:bg-cyber-elevated transition-all group">
+								<input type="checkbox" id="adaptiveMutation" class="w-4 h-4 accent-cyber-accent shrink-0" />
+								<span class="text-xs text-gray-300 group-hover:text-white">Adaptive PPO payload mutation</span>
+							</label>
 						</div>
 						<!-- Primary -->
 						<button type="button" id="checkBtn" onclick="fetchResults()"
@@ -217,7 +224,7 @@
 								<span class="text-xs text-gray-300 group-hover:text-white">Advanced WAF Bypass Payloads</span>
 							</label>
 							<label class="flex items-center gap-2 px-2 py-1.5 bg-cyber-elevated/50 rounded cursor-pointer hover:bg-cyber-elevated transition-all group">
-								<input type="checkbox" id="autoDetectWAF" class="w-4 h-4 accent-cyber-accent shrink-0" />
+								<input type="checkbox" id="autoDetectWAF" class="w-4 h-4 accent-cyber-accent shrink-0" checked />
 								<span class="text-xs text-gray-300 group-hover:text-white">Auto-detect WAF before testing</span>
 							</label>
 							<label class="flex items-center gap-2 px-2 py-1.5 bg-cyber-elevated/50 rounded cursor-pointer hover:bg-cyber-elevated transition-all group">
@@ -233,12 +240,8 @@
 								<span class="text-xs text-gray-300 group-hover:text-white">HTTP Protocol Manipulation</span>
 							</label>
 							<label class="flex items-center gap-2 px-2 py-1.5 bg-cyber-elevated/50 rounded cursor-pointer hover:bg-cyber-elevated transition-all group">
-								<input type="checkbox" id="adaptiveMutation" class="w-4 h-4 accent-cyber-accent shrink-0" />
-								<span class="text-xs text-gray-300 group-hover:text-white">Adaptive PPO payload mutation</span>
-							</label>
-							<label class="flex items-center gap-2 px-2 py-1.5 bg-cyber-accent/10 border border-cyber-accent/30 rounded cursor-pointer hover:bg-cyber-accent/20 transition-all group">
 								<input type="checkbox" id="falsePositiveTest" class="w-4 h-4 accent-cyber-accent shrink-0 false-positive-checkbox" />
-								<span class="text-xs text-cyber-accent group-hover:text-cyber-accent-hover">False Positive Test</span>
+								<span class="text-xs text-gray-300 group-hover:text-white">False Positive Test</span>
 							</label>
 							<label class="flex items-center gap-2 px-2 py-1.5 bg-cyber-elevated/50 rounded cursor-pointer hover:bg-cyber-elevated transition-all group">
 								<input type="checkbox" id="caseSensitiveTest" class="w-4 h-4 accent-cyber-accent shrink-0 case-sensitive-checkbox" />
