@@ -310,12 +310,12 @@ async function refreshPPODashboardWidget() {
 				<button type="button" onclick="selectPPOWafProfile('${escapeHtml(key)}')"
 					class="p-2.5 rounded-xl border text-left transition-all flex flex-col justify-between ${
 						isSelected
-							? 'bg-cyber-accent/15 border-cyber-accent text-white shadow-sm ring-1 ring-cyber-accent/40'
-							: 'bg-[#181923] border-white/[0.06] hover:border-white/20 text-slate-300 hover:text-white'
+							? 'bg-[#1c1d27] border-cyber-accent text-white'
+							: 'bg-[#12131a] border-white/[0.06] hover:border-white/20 text-slate-300 hover:text-white'
 					}">
 					<div class="flex items-center justify-between mb-1">
 						<span class="text-xs font-bold font-mono truncate">${escapeHtml(key)}</span>
-						<span class="w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-cyber-accent animate-ping' : 'bg-emerald-400'}"></span>
+						<span class="w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-cyber-accent' : 'bg-slate-600'}"></span>
 					</div>
 					<div class="flex items-center justify-between text-[10px] text-slate-400">
 						<span class="font-mono text-emerald-400 font-semibold">${bench.bypassRate}% bypass</span>
@@ -382,29 +382,19 @@ function renderSelectedProfilePolicy(wafName) {
 	// Display top 5 actions
 	const topActions = actionsWithProb.slice(0, 5);
 	let barsHtml = '';
-
-	const gradients = [
-		'from-emerald-500 to-cyber-accent',
-		'from-cyber-accent to-indigo-500',
-		'from-indigo-500 to-purple-500',
-		'from-purple-500 to-pink-500',
-		'from-amber-500 to-emerald-500',
-	];
-
 	for (let i = 0; i < topActions.length; i++) {
 		const item = topActions[i];
-		const grad = gradients[i % gradients.length];
 		barsHtml += `
 			<div>
-				<div class="flex items-center justify-between text-xs mb-1">
+				<div class="flex items-center justify-between text-xs mb-1.5">
 					<span class="font-medium text-slate-200 truncate flex items-center gap-1.5">
 						<span class="w-1.5 h-1.5 rounded-full bg-cyber-accent"></span>
 						${escapeHtml(item.label)}
 					</span>
 					<span class="font-mono text-xs font-bold text-cyber-accent ml-2 shrink-0">${item.percentage}%</span>
 				</div>
-				<div class="w-full bg-white/[0.05] h-2 rounded-full overflow-hidden">
-					<div class="bg-gradient-to-r ${grad} h-full rounded-full transition-all duration-500" style="width: ${Math.min(100, Math.max(8, item.percentage * 3.5))}%"></div>
+				<div class="w-full bg-[#12131a] border border-white/[0.06] h-2 rounded-full overflow-hidden">
+					<div class="bg-cyber-accent h-full rounded-full transition-all duration-300" style="width: ${Math.min(100, Math.max(6, item.percentage * 3.5))}%"></div>
 				</div>
 			</div>
 		`;
