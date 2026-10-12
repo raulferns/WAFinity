@@ -5,6 +5,19 @@
 var SLOW_RESPONSE_THRESHOLD = 2000;
 window.SLOW_RESPONSE_THRESHOLD = SLOW_RESPONSE_THRESHOLD;
 
+function escapeAttr(str) {
+	if (str === null || str === undefined) return '';
+	return String(str)
+		.replace(/&/g, '&amp;')
+		.replace(/"/g, '&quot;')
+		.replace(/'/g, '&#39;')
+		.replace(/</g, '&lt;')
+		.replace(/>/g, '&gt;')
+		.replace(/\r/g, '&#13;')
+		.replace(/\n/g, '&#10;');
+}
+window.escapeAttr = escapeAttr;
+
 function escapeHtml(str) {
 	const div = document.createElement('div');
 	div.textContent = str;
@@ -244,8 +257,36 @@ function closeConfirm(result) {
 }
 
 
+function copyTextToClipboard(text) {
+	if (navigator.clipboard && window.isSecureContext) {
+		return navigator.clipboard.writeText(text);
+	}
+	return new Promise((resolve, reject) => {
+		try {
+			const textArea = document.createElement('textarea');
+			textArea.value = text;
+			textArea.style.position = 'fixed';
+			textArea.style.left = '-999999px';
+			textArea.style.top = '-999999px';
+			document.body.appendChild(textArea);
+			textArea.focus();
+			textArea.select();
+			const successful = document.execCommand('copy');
+			document.body.removeChild(textArea);
+			if (successful) {
+				resolve();
+			} else {
+				reject(new Error('execCommand copy failed'));
+			}
+		} catch (err) {
+			reject(err);
+		}
+	});
+}
+window.copyTextToClipboard = copyTextToClipboard;
+
 function copyToClipboard(el, text) {
-	navigator.clipboard.writeText(text).then(() => {
+	copyTextToClipboard(text).then(() => {
 		const icon = el.querySelector('.copy-icon');
 		if (icon) {
 			const original = icon.innerHTML;

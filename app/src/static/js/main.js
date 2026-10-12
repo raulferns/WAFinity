@@ -253,6 +253,214 @@ function renderSummary(results, falsePositiveMode = false) {
 // Slow response threshold in ms
 var SLOW_RESPONSE_THRESHOLD = window.SLOW_RESPONSE_THRESHOLD || 2000;
 
+function substitutePayloadJson(obj, payload) {
+	if (typeof obj === 'string') {
+		return obj.replace(/\{PAYLOAD\}/g, payload).replace(/\{\{payload\}\}/g, payload);
+	} else if (Array.isArray(obj)) {
+		return obj.map((item) => substitutePayloadJson(item, payload));
+	} else if (obj && typeof obj === 'object') {
+		const res = {};
+		for (const [k, v] of Object.entries(obj)) {
+			res[k] = substitutePayloadJson(v, payload);
+		}
+		return res;
+	}
+	return obj;
+}
+
+/**
+ * Builds a curl command to manually test a security test payload from Windows cmd or terminal.
+ */
+function buildCmdTestCommand(opts) {
+	const payload = opts.payload !== undefined && opts.payload !== null ? String(opts.payload) : '';
+	const method = (opts.method || 'GET').toUpperCase();
+	let targetUrl = opts.targetUrl || '';
+	const followRedirect = Boolean(opts.followRedirect);
+	const customHeaders = opts.customHeaders || '';
+	const payloadTemplate = opts.payloadTemplate || '';
+
+	if (!targetUrl) {
+		targetUrl = 'https://example.com';
+	} else if (typeof normalizeUrl === 'function') {
+		targetUrl = normalizeUrl(targetUrl);
+	}
+
+	let cmd = 'curl -i -k';
+
+	if (followRedirect) {
+		cmd += ' -L';
+	}
+
+	if (customHeaders) {
+		const headerLines = customHeaders
+			.split(/\r?\n/)
+			.map((l) => l.trim())
+			.filter((l) => l.includes(':'));
+		for (const line of headerLines) {
+			const sanitized = line.replace(/"/g, '\\"');
+			cmd += ` -H "${sanitized}"`;
+		}
+	}
+
+	const isUrlPayload = /^https?:\/\//i.test(payload);
+
+	if (isUrlPayload) {
+		cmd += ` -X ${method} "${payload}"`;
+		return cmd;
+	}
+
+	if (method === 'GET' || method === 'HEAD' || method === 'DELETE' || method === 'OPTIONS') {
+		let finalUrl = targetUrl;
+		if (finalUrl.includes('{{payload}}')) {
+			finalUrl = finalUrl.replace(/\{\{payload\}\}/g, encodeURIComponent(payload));
+		} else {
+			const sep = finalUrl.includes('?') ? '&' : '?';
+			finalUrl = `${finalUrl}${sep}test=${encodeURIComponent(payload)}`;
+		}
+		cmd += ` -X ${method} "${finalUrl}"`;
+	} else if (method === 'POST' || method === 'PUT' || method === 'PATCH') {
+		cmd += ` -X ${method} "${targetUrl}"`;
+		if (payloadTemplate) {
+			let jsonObj;
+			try {
+				jsonObj = JSON.parse(payloadTemplate);
+				jsonObj = substitutePayloadJson(jsonObj, payload);
+			} catch {
+				jsonObj = { test: payload };
+			}
+			const jsonStr = JSON.stringify(jsonObj).replace(/"/g, '\\"');
+			cmd += ` -H "Content-Type: application/json" -d "${jsonStr}"`;
+		} else {
+			cmd += ` -d "test=${encodeURIComponent(payload)}"`;
+		}
+	} else {
+		const sep = targetUrl.includes('?') ? '&' : '?';
+		cmd += ` -X ${method} "${targetUrl}${sep}test=${encodeURIComponent(payload)}"`;
+	}
+
+	return cmd;
+}
+
+let cmdToastTimeout = null;
+
+function showCmdCopiedToast(cmd) {
+	let toast = document.getElementById('cmdCopiedToast');
+	if (!toast) {
+		toast = document.createElement('div');
+		toast.id = 'cmdCopiedToast';
+		toast.className =
+			'fixed bottom-5 right-5 z-[9999] max-w-md w-[calc(100vw-2.5rem)] transition-all duration-300 transform translate-y-6 opacity-0 pointer-events-none';
+		document.body.appendChild(toast);
+	}
+
+	toast.innerHTML = `
+		<div class="p-3 bg-[#13141c]/95 backdrop-blur-md border border-white/[0.1] rounded-xl shadow-2xl text-white pointer-events-auto flex flex-col gap-2">
+			<div class="flex items-center justify-between gap-3">
+				<div class="flex items-center gap-2">
+					<span class="w-4 h-4 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
+						<svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+						</svg>
+					</span>
+					<span class="text-xs font-semibold text-slate-200 font-mono tracking-tight">cURL command copied</span>
+				</div>
+				<button onclick="dismissCmdToast()" class="text-slate-500 hover:text-slate-300 p-0.5 rounded transition-colors" title="Close">
+					<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+					</svg>
+				</button>
+			</div>
+			<pre class="px-2.5 py-1.5 bg-[#0a0b10] border border-white/[0.06] rounded-lg text-xs font-mono text-emerald-400/90 overflow-x-auto whitespace-pre select-all max-h-20 scrollbar-none">${typeof escapeHtml === 'function' ? escapeHtml(cmd) : cmd}</pre>
+		</div>
+	`;
+
+	if (cmdToastTimeout) {
+		clearTimeout(cmdToastTimeout);
+	}
+
+	requestAnimationFrame(() => {
+		toast.classList.remove('translate-y-8', 'opacity-0', 'pointer-events-none');
+		toast.classList.add('translate-y-0', 'opacity-100');
+	});
+
+	cmdToastTimeout = setTimeout(() => {
+		dismissCmdToast();
+	}, 4000);
+}
+
+function dismissCmdToast() {
+	const toast = document.getElementById('cmdCopiedToast');
+	if (toast) {
+		toast.classList.remove('translate-y-0', 'opacity-100');
+		toast.classList.add('translate-y-8', 'opacity-0', 'pointer-events-none');
+	}
+	if (cmdToastTimeout) {
+		clearTimeout(cmdToastTimeout);
+		cmdToastTimeout = null;
+	}
+}
+
+function copyPayloadCmd(el) {
+	if (!el) return;
+	const payload = el.getAttribute('data-payload') ?? el.dataset?.payload ?? el.querySelector('.payload-text')?.textContent ?? '';
+	const method = (el.getAttribute('data-method') || el.dataset?.method || 'GET').toUpperCase();
+	const targetUrl = el.getAttribute('data-url') || el.dataset?.url || window.currentTestSession?.url || document.getElementById('url')?.value?.trim() || '';
+
+	const followRedirect = Boolean(window.currentTestSession?.settings?.followRedirect ?? document.getElementById('followRedirect')?.checked);
+	const customHeaders = localStorage.getItem('wafchecker_customHeaders') || document.getElementById('customHeaders')?.value?.trim() || '';
+	const payloadTemplate =
+		window.currentTestSession?.settings?.payloadTemplate ||
+		localStorage.getItem('wafchecker_payloadTemplate') ||
+		document.getElementById('payloadTemplate')?.value?.trim() ||
+		'';
+
+	const cmd = buildCmdTestCommand({
+		payload,
+		method,
+		targetUrl,
+		followRedirect,
+		customHeaders,
+		payloadTemplate,
+	});
+
+	const copyFn = typeof copyTextToClipboard === 'function' ? copyTextToClipboard : (txt) => navigator.clipboard.writeText(txt);
+
+	copyFn(cmd)
+		.then(() => {
+			const badge = el.querySelector('.payload-copy-badge');
+			if (badge) {
+				badge.classList.remove('opacity-0', 'text-slate-300', 'bg-black/50', 'border-white/10');
+				badge.classList.add('opacity-100', 'bg-emerald-500/25', 'text-emerald-300', 'border-emerald-500/40');
+				const label = badge.querySelector('.copy-label');
+				const icon = badge.querySelector('.copy-icon');
+				if (label) label.textContent = 'Copied!';
+				if (icon) {
+					icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>';
+					icon.classList.remove('text-slate-400');
+					icon.classList.add('text-emerald-300');
+				}
+				setTimeout(() => {
+					badge.classList.remove('opacity-100', 'bg-emerald-500/25', 'text-emerald-300', 'border-emerald-500/40');
+					badge.classList.add('opacity-0', 'text-slate-300', 'bg-black/50', 'border-white/10');
+					if (label) label.textContent = 'copy';
+					if (icon) {
+						icon.innerHTML =
+							'<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/>';
+						icon.classList.remove('text-emerald-300');
+						icon.classList.add('text-slate-400');
+					}
+				}, 1500);
+			}
+			showCmdCopiedToast(cmd);
+		})
+		.catch((err) => {
+			console.warn('Clipboard copy failed:', err);
+			if (typeof showAlert === 'function') {
+				showAlert(`Manual test command for cmd:\n\n${cmd}`, 'Manual CMD Test', 'info');
+			}
+		});
+}
+
 function renderResultRow(r, falsePositiveMode = false) {
 	const statusStr = String(r.status);
 	const isError = statusStr === 'ERR' || statusStr === 'error' || statusStr === 'Error';
@@ -315,6 +523,9 @@ function renderResultRow(r, falsePositiveMode = false) {
 		timeHtml = `<span class="text-slate-400 font-mono text-xs">${responseTime}ms</span>`;
 	}
 
+	const rowUrl = r.url || window.currentTestSession?.url || document.getElementById('url')?.value?.trim() || '';
+	const safeAttr = typeof escapeAttr === 'function' ? escapeAttr : escapeHtml;
+
 	return `
 		<tr data-status="${r.status}" class="hover:bg-white/[0.02] transition-colors border-b border-white/[0.04]">
 			<td class="px-4 py-2.5 text-xs text-slate-300 font-medium">${escapeHtml(r.category)}</td>
@@ -326,8 +537,24 @@ function renderResultRow(r, falsePositiveMode = false) {
 			</td>
 			<td class="px-4 py-2.5 text-center whitespace-nowrap">${timeHtml}</td>
 			<td class="px-4 py-2.5">
-				<code class="text-xs font-mono ${payloadClass} px-2.5 py-1 rounded-md break-all select-all block leading-relaxed">${escapeHtml(r.payload)}</code>
-				${adaptiveHtml}
+				<div class="relative group/payload">
+					<code class="text-xs font-mono ${payloadClass} payload-clickable px-2.5 py-1.5 rounded-md break-all block leading-relaxed select-all flex items-start justify-between gap-2"
+						onclick="copyPayloadCmd(this)"
+						data-payload="${safeAttr(r.payload)}"
+						data-method="${safeAttr(r.method || 'GET')}"
+						data-category="${safeAttr(r.category || '')}"
+						data-url="${safeAttr(rowUrl)}"
+						title="Copy test command">
+						<span class="payload-text flex-1 select-all break-all">${escapeHtml(r.payload)}</span>
+						<span class="payload-copy-badge shrink-0 inline-flex items-center gap-1 opacity-0 group-hover/payload:opacity-100 transition-all duration-150 px-1.5 py-0.5 rounded bg-black/50 border border-white/10 text-[10px] text-slate-300 pointer-events-none select-none">
+							<svg class="w-3 h-3 text-slate-400 copy-icon shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/>
+							</svg>
+							<span class="copy-label font-sans font-medium text-[10px]">copy</span>
+						</span>
+					</code>
+					${adaptiveHtml}
+				</div>
 			</td>
 		</tr>`;
 }
@@ -1037,6 +1264,7 @@ async function fetchResults() {
 							estimatedTotalTests = data.count;
 							updateProgress(0, estimatedTotalTests, 'Starting tests...', 'Initializing...', 0);
 						} else if (data.type === 'result') {
+							data.result.url = url;
 							allResults.push(data.result);
 							completedTests = data.completed;
 
@@ -1481,3 +1709,7 @@ window.closeMobileDrawer = closeMobileDrawer;
 window.configGoBack = configGoBack;
 window.toggleHelp = toggleHelp;
 window.filterResultsTableByStatus = filterResultsTableByStatus;
+window.buildCmdTestCommand = buildCmdTestCommand;
+window.copyPayloadCmd = copyPayloadCmd;
+window.showCmdCopiedToast = showCmdCopiedToast;
+window.dismissCmdToast = dismissCmdToast;

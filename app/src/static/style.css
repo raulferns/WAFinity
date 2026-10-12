@@ -1839,3 +1839,19 @@ div:has(+ .ep-body.ep-collapsed) svg:last-child {
 	color: #cbd5e1 !important;
 }
 
+.payload-clickable {
+	cursor: pointer;
+	position: relative;
+	transition: all 0.15s ease-in-out;
+}
+
+.payload-clickable:hover {
+	filter: brightness(1.2);
+	box-shadow: 0 0 0 1px rgba(240, 86, 39, 0.35);
+}
+
+.payload-clickable:active {
+	filter: brightness(0.95);
+	transform: scale(0.998);
+}
+
